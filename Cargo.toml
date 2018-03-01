@@ -1,0 +1,6 @@
+[package]
+name = "bag2"
+version = "0.1.0"
+authors = ["Nathan Bradley <njbradley1@buffs.wtamu.edu>"]
+
+[dependencies]
