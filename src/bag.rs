@@ -41,7 +41,7 @@ impl<Type: PartialEq + Clone> Bag<Type>
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
-    pub fn default_new() -> Self
+    pub fn new() -> Self
     {
         Bag { data: Vec::with_capacity( 1 ), used: 0 }
     }
@@ -58,7 +58,7 @@ impl<Type: PartialEq + Clone> Bag<Type>
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
-    pub fn new( initial_capacity: usize ) -> Self
+    pub fn with_capacity( initial_capacity: usize ) -> Self
     {
         if initial_capacity <= 0
         {
@@ -180,7 +180,7 @@ impl<Type: PartialEq + Clone> Bag<Type>
     /// Postcondition:
     ///     A new copy of the element has been added to this bag.
     /// # Panics
-    ///     "self.data.len() * 2" causes an unsigned int overflow
+    ///     "self.data.len() * 2" causes an unsigned integer overflow
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
@@ -267,28 +267,6 @@ impl<Type: PartialEq + Clone> Bag<Type>
         }
     }
 }
-
-/*impl<Type: PartialEq + Clone + Copy> Copy for Bag<Type>
-{
-    /// Initialize a new bag as an exact copy of source
-    /// Postcondition:
-    ///     The clone is not the same object as the sourse.
-    ///     The clone is the same type as the sourse.
-    ///     The clone will equal the sourse as long as both
-    ///     bags are unaltered
-    /// Return:
-    ///     A new bag initialized as bag with all the elements in
-    ///     source and with capacity to equal that number of elements.
-    ///     Subsequent changes to the copy will not affect the original,
-    ///     nor vice versa.
-    /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
-
-    fn copy( &self ) -> Self
-    {
-        Bag { data: self.data.clone() , used: self.used }
-    }
-}*/
 
 impl<Type: PartialEq + Clone> Clone for Bag<Type>
 {
@@ -387,13 +365,12 @@ impl<Type: PartialEq + Clone> std::ops::Add for Bag<Type>
     ///     The first of two bags
     /// Parameter: other
     ///     The second of two bags
-    /// Precondition:
-    ///     Neither b1 nor b2 is null, and b1.size() + b2.size() cannot
-    ///     exceed MAX_CAPACITY
     /// Postcondition:
     ///     The bag referenced by b1 and bag reference by b2 are not altered
     /// Return:
     ///     A bag that is the union of b1 and b2
+    /// # Panics
+    ///     self.used + other.used causes an unsigned integer overflow
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
@@ -401,7 +378,7 @@ impl<Type: PartialEq + Clone> std::ops::Add for Bag<Type>
 
     fn add( self, other: Bag<Type> ) -> Bag<Type>
     {
-        let mut return_bag = Bag::new( self.used + other.used );
+        let mut return_bag = Bag::with_capacity( self.used + other.used as usize);
         return_bag += self;
         return_bag += other;
         return_bag
