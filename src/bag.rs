@@ -1,8 +1,7 @@
 // File: bag.rs 
 
-import java.util.Arrays;
-import java.util.Objects;
-
+use std;
+use std::cmp::PartialEq;
 
 /// An DoubleArrayBag is an unordered collection of double numbers and in which
 /// the same number may appear multiple times.  The bag's capacity can grow as
@@ -17,11 +16,10 @@ import java.util.Objects;
 ///    H. Paul Haiduk with credit given to Michael Main
 ///
 /// version:
-///    February 10, 2018
+///    2.March.2018
 
-
-#[derive(Copy, Clone, Debug)]
-pub struct Bag<Type>
+// #[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Bag<Type: PartialEq + Clone>
 {
    // Invariant of the DoubleArrayBag class:
    //   1. The number of elements in the bag is in the instance variable 
@@ -32,419 +30,410 @@ pub struct Bag<Type>
    //      rest of data.
 
    data: Vec<Type>,
-   used: u16
+   used: usize
 }
 
-   /// Initialize an empty bag
-   /// post.
-   ///   This bag is empty and has a capacity of 1.
-   /// exception OutOfMemoryError <?>
-   ///   Indicates insufficient memory for allocating the array 
+impl<Type: PartialEq + Clone> Bag<Type>
+{
+    /// Initialize an empty bag
+    /// Return:
+    ///     A bag is empty and has a capacity of 0
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
 
-   public DoubleArrayBag( ) {
-      this.used = 0;
-      this.data = new double[1];
-   }
-
+    pub fn default_new() -> Self
+    {
+        Bag { data: Vec::with_capacity( 1 ), used: 0 }
+    }
 
     /// Initialize an empty bag having a capacity of initialCapacity
-    /// param:
-    ///   initialCapacity an int greater than 0
-    /// pre:
-    ///   initialCapacity must be greater than 0
-    /// post:
-    ///   This bag is empty and has a capacity of initialCapacity
-    /// exception: <?>
-    ///   IllegalArgumentException thrown if initialCapacity not greater than 0
-    ///   OutOfMemoryError thrown if insufficient memory for allocating the array
+    /// Parameter: initial_capacity
+    ///     An unsigned integer greater than 0
+    /// Precondition:
+    ///     initial_capacity must be greater than 0
+    /// Return:
+    ///     A bag is empty and has a capacity of initial_capacity
+    /// # Panics
+    ///     InitialCapacity given is not greater than 0
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
 
-   public DoubleArrayBag( int initialCapacity ) {
-       if ( initialCapacity < 1 )
-           throw new IllegalArgumentException("initialCapacity < 1");
-       this.used = 0;
-       try {
-           this.data = new double[initialCapacity];
-       }
-       catch (OutOfMemoryError err) {
-           int reducedCapacity = initialCapacity / 2;
-           this.data = new double[reducedCapacity];
-           throw new OutOfMemoryError("Could not accommodate request -- cut in half");
-       }
-   }
-
-
-    /// Initialize a new bag as an exact copy of source
-    /// param: source
-    ///   reference to bag that is to be copied
-    /// exception: <?> NullPointerException
-    ///   occurs when source is null
-    /// post:
-    ///   This bag is a copy of source and has a capacity of
-    ///   of number of elements in source
-
-   public DoubleArrayBag( DoubleArrayBag source ) {
-       if ( source == null ) {
-           throw new NullPointerException("source must not be null");
-       }
-
-       this.used = source.used;
-       this.data = new double[source.used];
-       /* below logic we would write if we did not have System.arraycopy
-       for (int index = 0; index < source.used; ++index) {
-           this.data[index] = source.data[index];
-       }
-       *
-       * Documentation from Oracle about System.arraycopy is:
-        * arraycopy(Object src, int srcPos, Object dest, int destPos, int length)
-        * Copies an array from the specified source array, beginning at the specified
-        * position, to the specified position of the destination array.
-        */
-       System.arraycopy(source.data, 0, this.data, 0, source.used);
-   }
-
-     
-
-   /// Generate a copy of this bag.
-   /// post:
-   ///    x.clone() != x
-   ///    x.clone().getClass() == x.getClass()
-   ///    x.clone().equals( x )
-   ///
-   /// return:
-   ///   The return value is a copy of this bag. Subsequent changes to the
-   ///   copy will not affect the original, nor vice versa.
-
-   public DoubleArrayBag clone( ) {  // Clone an DoubleArrayBag object.
-      DoubleArrayBag answer;
-      
-      try {
-         answer = (DoubleArrayBag) super.clone( );
-         answer.data = data.clone( );
-         return answer;
-      }
-      catch (CloneNotSupportedException e) {  
-         // This exception should not occur. But if it does, it would probably
-         // indicate a programming error that made super.clone unavailable.
-         // The most common error would be forgetting the "Implements Cloneable"
-         // clause at the start of this class.
-         throw new RuntimeException ("This class does not implement Cloneable");
-      }
-   }
-
-      
-
-    /// Compare this DoubleArrayBag to another object for equality of value
-    /// param: other
-    ///   reference to another DoubleArrayBag
-    ///
-    /// post:
-    ///   x.equals(x) is true
-    ///   if x.equals(y) then y.equals(x)
-    ///   x.equals(null) is false
-    ///
-    /// return:
-    ///   true if number of elements in this and other are the same AND if
-    ///   the values of all the elements in the bag are the same and in the
-    ///   same position in the bag
-    ///
-    /// note:
-    ///   If the value of other is null, then the return is false
-
-   @Override
-   public boolean equals(Object other) {
-       if ( other == null ) return false;
-
-       boolean isEqual = false;
-       if ( other instanceof DoubleArrayBag ) {
-           DoubleArrayBag candidate = (DoubleArrayBag) other;
-           //are we comparing this with this
-           if (this == other) return true;
-
-           if ( candidate.used != this.used ) return false;
-           if ( candidate.hashCode() != this.hashCode() ) return false;
-
-           int index = 0;
-           isEqual = true;
-           while ( isEqual && index < this.used ) {
-               if ( this.data[ index ] != candidate.data[ index ] )
-                   isEqual = false;
-               else
-                   index++;
-           }
-       }
-       return isEqual;
-   }
-
-
+    pub fn new( initial_capacity: usize ) -> Self
+    {
+        if initial_capacity <= 0
+        {
+            panic!( "initialCapacity must be > 0" );
+        }
+        else
+        {
+            Bag { data: Vec::with_capacity( initial_capacity ), used: 0 }
+        }
+    }
+    
     /// Potentially increase capacity of this bag
-    ///
-    /// pre:
-    ///   newCapacity must be greater than 0
-    ///
-    /// post:
-    ///   The bag's capacity is at least newCapacity.  If the capacity
-    ///   was already at or greater than newCapacity, then the capacity
-    ///   is left unchanged.
-    ///
-    /// param:
-    ///   newCapacity an integer greater than 0
-    ///
-    /// exception: <?>
-    ///   OutOfMemoryError if not enough dynamic available to allocate
-    ///   additional space
-    /// exception: <?>
-    ///   IllegalArgumentException if newCapacity not greater than 0
+    /// Parameter: new_capacity
+    ///     An unsigned integer greater than 0
+    /// Precondition:
+    ///     new_capacity must be greater than 0
+    /// Postcondition:
+    ///     The bag's capacity is at least newCapacity.  If the capacity
+    ///     was already at or greater than newCapacity, then the capacity
+    ///     is left unchanged.
+    /// # Panics
+    ///     InitialCapacity given is not greater than 0
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
 
-   public void ensureCapacity( int newCapacity ) {
-       if ( newCapacity < 1)
-           throw new IllegalArgumentException("newCapacity < 1");
+    pub fn ensure_capacity( &mut self, new_capacity: usize )
+    {
+        if new_capacity <= 0
+        {
+            panic!( "new_capacity < 1" );
+        }
+        else
+        {
+            //self.data.reserve( new_capacity );
 
-       if ( this.data.length < newCapacity ) {
-           double[] biggerArray = new double[newCapacity];
-           System.arraycopy(this.data, 0, biggerArray, 0, this.used);
-           this.data = null;
-           this.data = biggerArray;
-       }
-   }
-
-
-    /// returns the current capacity of the bag
-    /// post:
-    ///   This method does not alter state of the bag
-    /// return:
-    ///   an int that represents total capacity of this bag
-
-   public int getCapacity( ) {
-       return this.data.length;
-   }
-
-   @Override 
-   public int hashCode( ) {
-       // fill all values with 0 in this.data from used through length - 1
-       if ( this.used < this.data.length) 
-          Arrays.fill( this.data, this.used, this.data.length - 1, 0);
-
-       return Objects.hash( this.used ) + Arrays.hashCode( this.data );
-   }
-
-
-   /// Erases all copies of a specified element from this bag if target exists in bag.
-   /// param: target
-   ///   the element(s) to remove from the bag
-   /// post:
-   ///   If target was found in the bag, then all copies of
-   ///   target have been removed and the method returns number of items removed. 
-   /// return:
-   ///   int value from 0 to number of items erased from bag
-
-   public int erase( int target ) {
-       int count = 0;
-       int index = 0;
-
-       while (index < this.used) {
-           if (this.data[index] == target) {
-               --this.used;
-               this.data[index] = this.data[this.used];
-               ++count;
-           }
-           else
-               ++index;
-       }
-
-       return count;
-   }
-              
-
-   /// Remove one copy of a specified element from this bag.
-   /// param: target
-   ///   the element to remove from the bag
-   /// post:
-   ///   If target was found in the bag, then one copy of
-   ///   target has been removed and the method returns true. 
-   ///   Otherwise the bag remains unchanged and the method returns false. 
-   /// return:
-   ///   true or false depending on whether target exists in the bag
-
-   public boolean erase_one(int target) {
-      int index; // The location of target in the data array.
-       
-      // First, set index to the location of target in the data array,
-      // which could be as small as 0 or as large as used-1; If target
-      // is not in the array, then index will be set equal to used;
-      for (index = 0; (index < used) && (target != data[index]); index++) {
-         // No work is needed in the body of this for-loop.
-      }   
-         
-      if (index == used)
-         // The target was not found, so nothing is removed.
-         return false;
-      else {
-         // The target was found at data[index].
-         // So reduce used by 1 and copy the last element onto data[index].
-         used--;
-         data[index] = data[used];
-         return true;
-      }
-   }
-   
-
-   /// Add a new element to this bag doubling capacity if needed
-   /// 
-   /// param: newItem
-   ///   the new element that is being inserted
-   /// post:
-   ///   A new copy of the element has been added to this bag.
-
-   public void insert(double newItem) {
-      if ( used == this.data.length ) {
-          this.ensureCapacity( this.data.length /// 2 );
-      }
-      data[ used++ ] = newItem;
-   }
-
-
-   /// Add the contents of another bag to this bag.
-   /// param: addend
-   ///   a bag whose contents will be added to this bag
-   /// pre:
-   ///   The parameter, addend, is not null. 
-   /// post:
-   ///   The elements from addend have been added to this bag.
-   /// exception: <?> NullPointerException
-   ///   Indicates that addend is null. 
-   /// exception: <?> OutOfMemoryError
-   ///   Indicates insufficient memory to add addend to this bag
-
-   public void plusEquals(DoubleArrayBag addend) {
-       if ( addend == null ) {
-           throw new NullPointerException("Cannot add from null object");
-       }
-       if (this.used + addend.used > this.data.length ) {
-           this.ensureCapacity( this.used + addend.used );
-       }
-         
-      System.arraycopy(addend.data, 0, this.data, this.used, addend.used);
-      used += addend.used;
-   }   
-
-
-   /// Determine the number of elements in this bag.
-   /// return:
-   ///   the number of elements in this bag
-
-   public int size( ) {
-      return used;
-   }
-   
-
-   /// Accessor method to count the number of occurrences of a particular element
-   /// in this bag.
-   /// param: target
-   ///   the element for which number of occurrences will be counted 
-   /// return:
-   ///   the number of times that target occurs in this bag
-
-   public int occurrences(int target) {
-      int answer = 0;
-      
-      for (int index = 0; index < used; index++) {
-         if (target == data[index]) answer++; 
-      }
-      return answer;
-   }
-
-
-    /// This method renders the bag's contents into a human readable form
-    /// post:
-    ///    The bag is not altered by this method
-
-   public String toString() {
-       // StringBuffer is used since its contents are mutable.  Strings are
-       // immutable and, thus, very inefficient for such purpose
-       StringBuffer sb = new StringBuffer();
-       sb.append("DoubleArrayBag with ");
-       sb.append(this.size());
-       sb.append(" elements: [");
-       if ( this.size() == 0 ) {
-           sb.append(" ]");
-           return sb.toString();
-       }
-       for (int i=0; i < this.size()-1; ++i) {
-           sb.append(" ");
-           sb.append(this.data[i]);
-           sb.append(",");
-       }
-       sb.append(" "); sb.append(this.data[this.size()-1]);
-       sb.append(" ]");
-       sb.append(" Capacity: "); sb.append(this.getCapacity());
-       return sb.toString();
-   }
-
-
-    /// reduce capacity of this bag to current size if there is
-    /// excess capacity
-    ///
-    /// post:
-    ///   capacity of this bag is reduced to the current number
-    ///   of items in bag or left unchanged if capacity equals to
-    ///   number of items in bag but must be at least 1
-    ///
-    /// exception:
-    ///   OutOfMemoryError if not enough dynamic memory to
-    ///   support allocation and deallocation of memory
-
-    public void trimToSize( ) {
-        if ( this.used < this.data.length ) {
-            int newCapacity;
-            if ( this.used <= 1 )
-                newCapacity = 1;
-            else
-                newCapacity = this.used;
-
-            double[] trimmedArray = new double[ newCapacity ];
-            System.arraycopy( trimmedArray, 0, this.data, 0, this.used );
-            this.data = null;
-            this.data = trimmedArray;
-            trimmedArray = null;
+            if self.data.len() < new_capacity
+            {
+                let mut new_data = Vec::with_capacity( new_capacity );
+                new_data.extend_from_slice( &self.data[ ..self.used ] );
+                self.data = new_data;
+            }
         }
     }
 
+    /// Returns the current capacity of the bag
+    /// Postcondition:
+    ///     This method does not alter state of the bag
+    /// Return:
+    ///     An unsigned integer that represents total capacity of this bag
 
-   /// Create a new bag that contains all the elements from two other bags -- note that
-   /// this is a class method NOT an instance method and must be called with class
-   /// name qualifier.
-   /// param: b1
-   ///   the first of two bags
-   /// param: b2
-   ///   the second of two bags
-   /// pre:
-   ///   Neither b1 nor b2 is null, and b1.size() + b2.size() cannot
-   ///   exceed MAX_CAPACITY
-   /// post:
-   ///   bag referenced by b1 and bag reference by b2 are not altered
-   /// return:
-   ///   the union of b1 and b2
-   /// exception: <?> NullPointerException
-   ///   Indicates that one of the arguments is null.
-   /// exception: <?> OutOfMemoryError
-   ///   Indicates insufficient memory for the new bag.
+    pub fn get_capacity( &self ) -> usize
+    {
+        self.data.len()
+    }
 
-   public static DoubleArrayBag union(DoubleArrayBag b1, DoubleArrayBag b2) {
-      if ( b1 == null || b2 == null ) {
-          throw new NullPointerException("one or both bags reference is null");
-      }
+    /// Erases all copies of a specified element from this bag if target exists in bag.
+    /// Parameter: target
+    ///     the element(s) to remove from the bag
+    /// Postcondition:
+    ///     If target was found in the bag, then all copies of
+    ///     target have been removed and the method returns number of items removed. 
+    /// Return:
+    ///     An unsigned integer value representing the number of items erased from bag
 
-      DoubleArrayBag newBag = new DoubleArrayBag( b1.size() + b2.size() );
+    pub fn erase( &mut self, target: Type ) -> usize
+    {
+        let mut remove_count = 0;
+        let mut index = 0;
+
+        // loop will only iterate though the full
+        //  range of 0 to this.used
+        while index < self.used
+        {
+            if self.data[ index ] == target
+            {
+               self.used -= 1;
+               self.data[ index ] = self.data[ self.used ].clone();
+               remove_count += 1;
+            }
+            else
+            {
+               index += 1;
+            }
+        }
+
+        remove_count
+    }
+
+    /// Remove one copy of a specified element from this bag.
+    /// Parameter: target
+    ///     the element to remove from the bag
+    /// Postcondition:
+    ///     If target was found in the bag, then one copy of
+    ///     target has been removed and the method returns true. 
+    ///     Otherwise the bag remains unchanged and the method returns false. 
+    /// Return:
+    ///     true or false depending on whether target exists in the bag
+
+    pub fn erase_one( &mut self, target: Type ) -> bool
+    {
+        // loop will iterate though the range of 0 to self.used
+        //  or exit as a return if self.data[index] == target
+        for index in 0..self.used
+        {
+            if self.data[ index ] == target
+            {
+               self.used -= 1;
+               self.data[ index ] = self.data[ self.used ].clone();
+               return true;
+            }
+        }
+
+        false
+    }
+
+    /// Add a new element to this bag doubling capacity if needed
+    /// Parameter: new_item
+    ///     The new element that is being inserted
+    /// Postcondition:
+    ///     A new copy of the element has been added to this bag.
+    /// # Panics
+    ///     "self.data.len() * 2" causes an unsigned int overflow
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
+
+    pub fn insert( &mut self, new_item: Type )
+    {
+        if self.used == self.data.len()
+        {
+            let new_capacity = self.data.len() * 2 as usize;
+            self.ensure_capacity( new_capacity );
+        }
+
+
+        self.data[ self.used ] = new_item;
+        self.used += 1;
+    }
+
+    /// Determine the number of elements in this bag.
+    /// Postcondition:
+    ///     This method does not alter state of the bag
+    /// Return:
+    ///     The number of elements in this bag
+
+    pub fn size( &self ) -> usize
+    {
+        self.used
+    }   
+
+    /// Accessor method to count the number of occurrences of a
+    /// particular element in this bag.
+    /// Parameter: target
+    ///     The element for which number of occurrences will be counted 
+    /// Postcondition:
+    ///     This method does not alter state of the bag
+    /// Return:
+    ///     The number of times that target occurs in this bag
+
+    pub fn occurrences( &self, target: Type ) -> usize
+    {
+        let mut return_count = 0;
       
-      /* below code necessary if we didn't have plusEquals method
-      System.arraycopy(b1.data, 0, newBag.data, 0, b1.size() );
-      System.arraycopy(b2.data, 0, newBag.data, b1.size(), b2.size());
-      newBag.used = b1.size() + b2.size();
-      */
-      newBag.plusEquals(b1);
-      newBag.plusEquals(b2);
+        for index in 0..self.used
+        {
+            if target == self.data[ index ]
+            {
+                return_count += 1;
+            }
+        }
 
-      return newBag;
-   }
+        return_count
+    }
 
+    /// Reduces the capacity of this bag to current size if there is
+    /// excess capacity
+    /// Postcondition:
+    ///   capacity of this bag is reduced to the current number
+    ///   of items in bag or left unchanged if capacity equals to
+    ///   number of items in bag but must be at least 1
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
+
+    pub fn trim_to_size( &mut self )
+    {
+        if self.used < self.data.len()
+        {
+            let new_capacity;
+
+            if self.used <= 1
+            {
+                new_capacity = 1;
+            }
+            else
+            {
+                new_capacity = self.used;
+            }
+
+            //self.data.reserve( new_capacity );
+
+            if self.data.len() < new_capacity
+            {
+                let mut new_data = Vec::with_capacity( new_capacity );
+                new_data.extend_from_slice( &self.data[ ..self.used ] );
+                self.data = new_data;
+            }
+        }
+    }
+}
+
+/*impl<Type: PartialEq + Clone + Copy> Copy for Bag<Type>
+{
+    /// Initialize a new bag as an exact copy of source
+    /// Postcondition:
+    ///     The clone is not the same object as the sourse.
+    ///     The clone is the same type as the sourse.
+    ///     The clone will equal the sourse as long as both
+    ///     bags are unaltered
+    /// Return:
+    ///     A new bag initialized as bag with all the elements in
+    ///     source and with capacity to equal that number of elements.
+    ///     Subsequent changes to the copy will not affect the original,
+    ///     nor vice versa.
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
+
+    fn copy( &self ) -> Self
+    {
+        Bag { data: self.data.clone() , used: self.used }
+    }
+}*/
+
+impl<Type: PartialEq + Clone> Clone for Bag<Type>
+{
+    /// Initialize a new bag as an exact copy of source
+    /// Postcondition:
+    ///     The clone is not the same object as the sourse.
+    ///     The clone is the same type as the sourse.
+    ///     The clone will equal the sourse as long as both
+    ///     bags are unaltered
+    /// Return:
+    ///     A new bag initialized as bag with all the elements in
+    ///     source and with capacity to equal that number of elements.
+    ///     Subsequent changes to the copy will not affect the original,
+    ///     nor vice versa.
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
+
+    fn clone( &self ) -> Self
+    {
+        Bag { data: self.data.clone() , used: self.used }
+    }
+}
+
+impl<Type: PartialEq + Clone> PartialEq for Bag<Type>
+{
+    /// Compare this DoubleArrayBag to another object for equality of value
+    /// Parameter: self
+    ///     The first of two bags
+    /// Parameter: other
+    ///     The second of two bags
+    /// post:
+    ///     x == x is true
+    ///     if x == y, then y == x
+    /// Return:
+    ///     true if number of elements in this and other are the same AND if
+    ///     the values of all the elements in self are the same and in the
+    ///     same position in other
+
+    fn eq( &self, other: &Bag<Type> ) -> bool
+    {
+        if self.used != other.used
+        {
+            return false;
+        }
+
+        // loop will iterate though the range of 0 to self.used
+        //  or exit as a return if self.data[index] != other.data[index]
+        for index in 0..self.used
+        {
+            if self.data[index] != other.data[index]
+            {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    fn ne( &self, other: &Bag<Type> ) -> bool
+    {
+        !( self == other )
+    }
+}
+
+impl<Type: PartialEq + Clone> std::ops::AddAssign for Bag<Type>
+{
+    /// Add the contents of another bag to this bag.
+    /// Parameter: self
+    ///     The bag that will be added to
+    /// Parameter: other
+    ///     A bag whose contents will be added to self
+    /// Postcondition:
+    ///     The elements from addend have been added to self
+    ///     Other will be unmodified
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
+
+    fn add_assign( &mut self, other: Bag<Type> )
+    {
+        self.used += other.used;
+
+        if self.used > self.get_capacity()
+        {
+            let new_capacity = self.used;
+            self.ensure_capacity( new_capacity );
+        }
+
+        self.data.extend_from_slice( &other.data[ ..other.used ] );
+    }
+}
+
+impl<Type: PartialEq + Clone> std::ops::Add for Bag<Type>
+{
+    /// Create a new bag that contains all the elements from two other bags
+    /// Parameter: self
+    ///     The first of two bags
+    /// Parameter: other
+    ///     The second of two bags
+    /// Precondition:
+    ///     Neither b1 nor b2 is null, and b1.size() + b2.size() cannot
+    ///     exceed MAX_CAPACITY
+    /// Postcondition:
+    ///     The bag referenced by b1 and bag reference by b2 are not altered
+    /// Return:
+    ///     A bag that is the union of b1 and b2
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
+
+    type Output = Bag<Type>;
+
+    fn add( self, other: Bag<Type> ) -> Bag<Type>
+    {
+        let mut return_bag = Bag::new( self.used + other.used );
+        return_bag += self;
+        return_bag += other;
+        return_bag
+    }
+}
+
+impl<Type: PartialEq + Clone + std::fmt::Display> std::fmt::Display for Bag<Type>
+{
+    /// This method renders the bag's contents into a human readable form
+    /// Precondition:
+    ///     The type in the bag implements the type: Display
+    /// Postcondition:
+    ///     The bag is not altered by this method
+
+    fn fmt( &self, fmt: &mut std::fmt::Formatter ) -> std::fmt::Result
+    {
+        write!( fmt, "Bag with {} elements: [", self.used )?;
+
+        if self.used == 0
+        {
+            write!( fmt, " ]" )
+        }
+        else
+        {
+            for index in 0..( self.used - 1 )
+            {
+                write!( fmt, " {},", self.data[ index ] )?;
+            }
+
+            write!( fmt, " {} ] Capacity: {}",
+                    self.data[ self.used - 1 ],
+                    self.data.len() )
+        }
+    }
 }
