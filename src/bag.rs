@@ -19,7 +19,7 @@ use std::cmp::PartialEq;
 ///    2.March.2018
 
 // #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Bag<Type: PartialEq + Clone>
+pub struct Bag<Type: PartialEq + Clone + Default>
 {
    // Invariant of the DoubleArrayBag class:
    //   1. The number of elements in the bag is in the instance variable 
@@ -33,17 +33,17 @@ pub struct Bag<Type: PartialEq + Clone>
    used: usize
 }
 
-impl<Type: PartialEq + Clone> Bag<Type>
+impl<Type: PartialEq + Clone + Default> Bag<Type>
 {
     /// Initialize an empty bag
     /// Return:
-    ///     A bag is empty and has a capacity of 0
+    ///     A bag that is empty and has a capacity of 0
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
     pub fn new() -> Self
     {
-        Bag { data: Vec::with_capacity( 1 ), used: 0 }
+        Bag { data: vec![ Type::default(); 1 ], used: 0 }
     }
 
     /// Initialize an empty bag having a capacity of initialCapacity
@@ -52,7 +52,7 @@ impl<Type: PartialEq + Clone> Bag<Type>
     /// Precondition:
     ///     initial_capacity must be greater than 0
     /// Return:
-    ///     A bag is empty and has a capacity of initial_capacity
+    ///     A bag that is empty and has a capacity of initial_capacity
     /// # Panics
     ///     InitialCapacity given is not greater than 0
     /// # Aborts
@@ -66,7 +66,7 @@ impl<Type: PartialEq + Clone> Bag<Type>
         }
         else
         {
-            Bag { data: Vec::with_capacity( initial_capacity ), used: 0 }
+            Bag { data: vec![ Type::default(); initial_capacity ], used: 0 }
         }
     }
     
@@ -84,7 +84,7 @@ impl<Type: PartialEq + Clone> Bag<Type>
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
-    pub fn ensure_capacity( &mut self, new_capacity: usize )
+    pub fn ensure_capacity( &mut self, mut new_capacity: usize )
     {
         if new_capacity <= 0
         {
@@ -92,13 +92,10 @@ impl<Type: PartialEq + Clone> Bag<Type>
         }
         else
         {
-            //self.data.reserve( new_capacity );
-
             if self.data.len() < new_capacity
             {
-                let mut new_data = Vec::with_capacity( new_capacity );
-                new_data.extend_from_slice( &self.data[ ..self.used ] );
-                self.data = new_data;
+                new_capacity -= self.data.len();
+                self.data.extend( vec![ Type::default(); new_capacity ] );
             }
         }
     }
@@ -238,37 +235,35 @@ impl<Type: PartialEq + Clone> Bag<Type>
     ///   capacity of this bag is reduced to the current number
     ///   of items in bag or left unchanged if capacity equals to
     ///   number of items in bag but must be at least 1
-    /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
 
     pub fn trim_to_size( &mut self )
     {
-        if self.used < self.data.len()
+        if self.used <= 1
         {
-            let new_capacity;
-
-            if self.used <= 1
-            {
-                new_capacity = 1;
-            }
-            else
-            {
-                new_capacity = self.used;
-            }
-
-            //self.data.reserve( new_capacity );
-
-            if self.data.len() < new_capacity
-            {
-                let mut new_data = Vec::with_capacity( new_capacity );
-                new_data.extend_from_slice( &self.data[ ..self.used ] );
-                self.data = new_data;
-            }
+            self.data.truncate( 1 );
+        }
+        else
+        {
+            self.data.truncate( self.used );
         }
     }
 }
 
-impl<Type: PartialEq + Clone> Clone for Bag<Type>
+impl<Type: PartialEq + Clone + Default> Default for Bag<Type>
+{
+    /// Initialize an empty bag
+    /// Return:
+    ///     A bag that is empty and has a capacity of 0
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
+
+    fn default() -> Self
+    {
+        Bag::new()
+    }
+}
+
+impl<Type: PartialEq + Clone + Default> Clone for Bag<Type>
 {
     /// Initialize a new bag as an exact copy of source
     /// Postcondition:
@@ -290,7 +285,7 @@ impl<Type: PartialEq + Clone> Clone for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone> PartialEq for Bag<Type>
+impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
 {
     /// Compare this DoubleArrayBag to another object for equality of value
     /// Parameter: self
@@ -331,7 +326,7 @@ impl<Type: PartialEq + Clone> PartialEq for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone> std::ops::AddAssign for Bag<Type>
+impl<Type: PartialEq + Clone + Default> std::ops::AddAssign for Bag<Type>
 {
     /// Add the contents of another bag to this bag.
     /// Parameter: self
@@ -358,7 +353,7 @@ impl<Type: PartialEq + Clone> std::ops::AddAssign for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone> std::ops::Add for Bag<Type>
+impl<Type: PartialEq + Clone + Default> std::ops::Add for Bag<Type>
 {
     /// Create a new bag that contains all the elements from two other bags
     /// Parameter: self
@@ -385,17 +380,17 @@ impl<Type: PartialEq + Clone> std::ops::Add for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + std::fmt::Display> std::fmt::Display for Bag<Type>
+impl<Type: PartialEq + Clone + Default + std::fmt::Debug> std::fmt::Debug for Bag<Type>
 {
     /// This method renders the bag's contents into a human readable form
     /// Precondition:
-    ///     The type in the bag implements the type: Display
+    ///     The type in the bag implements the type: Debug
     /// Postcondition:
     ///     The bag is not altered by this method
 
     fn fmt( &self, fmt: &mut std::fmt::Formatter ) -> std::fmt::Result
     {
-        write!( fmt, "Bag with {} elements: [", self.used )?;
+        write!( fmt, "Bag with {:?} elements: [", self.used )?;
 
         if self.used == 0
         {
@@ -403,14 +398,26 @@ impl<Type: PartialEq + Clone + std::fmt::Display> std::fmt::Display for Bag<Type
         }
         else
         {
+            // This loop will only loop though the full range of
+            //  values from 0 to self.used - 1
             for index in 0..( self.used - 1 )
             {
-                write!( fmt, " {},", self.data[ index ] )?;
+                write!( fmt, " {:?},", self.data[ index ] )?;
             }
 
-            write!( fmt, " {} ] Capacity: {}",
+            write!( fmt, " {:?} ] Capacity: {:?}",
                     self.data[ self.used - 1 ],
                     self.data.len() )
         }
+    }
+}
+
+impl<Type: PartialEq + Clone + Default + std::hash::Hash> std::hash::Hash for Bag<Type>
+{
+    // Used for places that need a hash, like a hashmap
+    fn hash<HashType: std::hash::Hasher>( &self, state: &mut HashType )
+    {
+        self.used.hash( state );
+        self.data.hash( state );
     }
 }
