@@ -341,15 +341,16 @@ impl<Type: PartialEq + Clone + Default> std::ops::AddAssign for Bag<Type>
 
     fn add_assign( &mut self, other: Bag<Type> )
     {
+        let old_capacity = self.data.len();
+
+        self.trim_to_size();
+        self.data.extend_from_slice( &other.data[ ..other.used ] );
         self.used += other.used;
 
-        if self.used > self.get_capacity()
+        if self.used < old_capacity
         {
-            let new_capacity = self.used;
-            self.ensure_capacity( new_capacity );
+            self.ensure_capacity( old_capacity );
         }
-
-        self.data.extend_from_slice( &other.data[ ..other.used ] );
     }
 }
 
@@ -373,9 +374,11 @@ impl<Type: PartialEq + Clone + Default> std::ops::Add for Bag<Type>
 
     fn add( self, other: Bag<Type> ) -> Bag<Type>
     {
-        let mut return_bag = Bag::with_capacity( self.used + other.used as usize);
-        return_bag += self;
-        return_bag += other;
+        let mut return_bag = Bag::with_capacity( self.used );
+        return_bag.data.clone_from_slice( &self.data[ ..self.used ] );
+        return_bag.data.extend_from_slice( &other.data[ ..other.used ] );
+        return_bag.used = self.used + other.used;
+
         return_bag
     }
 }
