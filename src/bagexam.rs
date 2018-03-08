@@ -9,6 +9,7 @@
 // constants POINTS[1], POINTS[2]...
 //
 
+//#![ RUST_TEST_NOCAPTURE = 1 ]
 #![ allow( unused_assignments ) ]
 #![ allow( dead_code ) ]
 
@@ -16,10 +17,37 @@ extern crate rand;
 
 use bag::Bag;
 use std;
+use std::io::{self, Write};
+
+macro_rules! print_test {
+    ( $( $args:tt )* ) => 
+    (
+        let mut output = String::new();
+        ::std::fmt::write( &mut output, format_args!( $( $args )* ) ).unwrap();
+        io::stdout().write( output.as_bytes() ).unwrap();
+    );
+}
+
+macro_rules! println_test {
+    () => ( print_test!( "\n" ) );
+    ( $fmt:expr ) => ( print_test!( concat!( $fmt, "\n" ) ) );
+    ( $fmt:expr, $( $arg:tt )* ) => ( print_test!( concat!( $fmt, "\n" ), $( $arg )* ) );
+}
+
+macro_rules! read_input {
+    () => 
+    {{
+        io::stdout().flush().unwrap();
+        let mut input = String::new();
+        io::stdin().read_line( &mut input ).unwrap();
+        input
+    }};
+}
 
 // Descriptions and points for each of the tests:
-static MANY_TESTS: u8 = 5;
-static POINTS: [ u8; 6 ] = [
+static mut TAKE_INPUT: bool = true;
+const MANY_TESTS: u8 = 5;
+const POINTS: [ u8; 6 ] = [
     100, // Total points for all tests.
      32,  // Test 1 points
      12,  // Test 2 points
@@ -28,7 +56,7 @@ static POINTS: [ u8; 6 ] = [
      12   // Test 5 points
 ];
 
-static DESCRIPTION: [ &'static str; 6 ] = [
+const DESCRIPTION: [ &'static str; 6 ] = [
     "tests for bag Class",
     "Testing insert and the constant member functions",
     "Testing the copy constructor and == methodr",
@@ -37,6 +65,14 @@ static DESCRIPTION: [ &'static str; 6 ] = [
     "Testing += method and non-instance method +"
 ];
 
+#[ allow( non_snake_case ) ]
+#[test]
+#[ignore]
+fn Dont_Ask()
+{
+    unsafe{ TAKE_INPUT = false; }
+    bagexam();
+}
 
 /// **************************************************************************
 ///   This function determines if the bag (test) is "correct" according to
@@ -47,13 +83,13 @@ fn correct<Type: PartialEq + Clone + Default>( test_bag: &Bag<Type> , n: usize )
 {
     if test_bag.size( ) == n
     {
-        println!( "Test passed.\n" );
+        println_test!( "Test passed.\n" );
         true
         
     }
     else
     {
-        println!( "Test failed.\n" );
+        println_test!( "Test failed.\n" );
         false
     }
 }
@@ -70,7 +106,7 @@ fn test1() -> u8
     let mut test_bag = Bag::new();
     let mut test_letter = 'A' as u8;
 
-    println!( "{}. Testing size for an empty bag.", test_letter as char );
+    println_test!( "{}. Testing size for an empty bag.", test_letter as char );
     test_letter += 1;
 
     if !correct( &test_bag, 0 )
@@ -79,7 +115,7 @@ fn test1() -> u8
     }
 
 
-    println!( "{}. Adding the number 4 to the bag, and then testing\n   size.", test_letter as char );
+    println_test!( "{}. Adding the number 4 to the bag, and then testing\n   size.", test_letter as char );
     test_letter += 1;
     test_bag.insert( 4 );
 
@@ -89,7 +125,7 @@ fn test1() -> u8
     }
 
 
-    println!( "{}. Inserting the number 2 into the bag.\n   Then checking size.", test_letter as char );
+    println_test!( "{}. Inserting the number 2 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
     test_bag.insert( 2 );
 
@@ -100,7 +136,7 @@ fn test1() -> u8
     }
 
 
-    println!( "{}. Inserting the number 1 into the bag.\n   Then checking size.", test_letter as char );
+    println_test!( "{}. Inserting the number 1 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
     test_bag.insert( 1 );
 
@@ -110,7 +146,7 @@ fn test1() -> u8
     }
 
 
-    println!( "{}. Inserting the number 3 into the bag.\n   Then checking size.", test_letter as char );
+    println_test!( "{}. Inserting the number 3 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
     test_bag.insert( 3 );
 
@@ -120,7 +156,7 @@ fn test1() -> u8
     }
 
 
-    println!( "{}. Inserting another 2 into the bag.\n   Then checking size.", test_letter as char );
+    println_test!( "{}. Inserting another 2 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
     test_bag.insert( 2 );
 
@@ -129,11 +165,11 @@ fn test1() -> u8
         return 0;
     }
 
-    println!( "   Then checking occurrences of 2." );
+    println_test!( "   Then checking occurrences of 2." );
 
     if test_bag.occurrences( 2 ) == 2
     {
-        println!( "Test passed." );
+        println_test!( "Test passed." );
     }
     else
     {
@@ -141,7 +177,7 @@ fn test1() -> u8
     }
 
 
-    println!( "{}. Inserting the numbers 5, 6, and 7 into the bag.\n   Then checking size.", test_letter as char );
+    println_test!( "{}. Inserting the numbers 5, 6, and 7 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
     test_bag.insert( 5 );
     test_bag.insert( 6 );
@@ -153,14 +189,14 @@ fn test1() -> u8
     }
 
 
-    println!( "{}. Inserting two more 2's into the bag.\n   and then checking occurrences of 2's\n", test_letter as char );
+    println_test!( "{}. Inserting two more 2's into the bag.\n   and then checking occurrences of 2's\n", test_letter as char );
     test_letter += 1;
     test_bag.insert( 2 );
     test_bag.insert( 2 );
 
     if test_bag.occurrences( 2 ) == 4
     {
-        println!( "Test passed." );
+        println_test!( "Test passed." );
     }
     else
     {
@@ -168,7 +204,7 @@ fn test1() -> u8
     }
 
 
-    println!( "{}. Inserting {} random items between 0 and 49\n   and then checking size.", test_letter as char, TEST_SIZE );
+    println_test!( "{}. Inserting {} random items between 0 and 49\n   and then checking size.", test_letter as char, TEST_SIZE );
 
     for _ in 0..TEST_SIZE
     {
@@ -194,7 +230,7 @@ fn test2() -> u8
 {
     let mut test_bag = Bag::new();
 
-    println!( "A. Testing that copy constructor works okay for empty bag..." );
+    println_test!( "A. Testing that copy constructor works okay for empty bag..." );
     let copy1 = Bag::from_bag( &test_bag );
 
     if !correct( &copy1, 0 )
@@ -203,34 +239,34 @@ fn test2() -> u8
     }
 
 
-    print!( "B. Testing copy constructor with 4-item bag..." );
+    print_test!( "B. Testing copy constructor with 4-item bag..." );
     test_bag.insert( 1 );
     test_bag.insert( 1 );
     test_bag.insert( 1 );
     test_bag.insert( 1 );
     let copy2 = Bag::from_bag( &test_bag );
-    println!( "   and now testing the == method..." );
+    println_test!( "   and now testing the == method..." );
 
     if !( test_bag == copy2 ) || !( copy2 == test_bag )
     {
-        println!( "Test failed.\n" );
+        println_test!( "Test failed.\n" );
         return 0;
     }
     else
     {
-        println!( "Test passed.\n" );
+        println_test!( "Test passed.\n" );
     }
 
 
     test_bag.insert( 1 ); // Alter the original, but not the copy
-    println!( "C. Then checking size of copy" );
+    println_test!( "C. Then checking size of copy" );
 
     if !correct( &copy2, 4 )
     {
         return 0;
     }
 
-    println!( "D. Altering original but not the copy" );
+    println_test!( "D. Altering original but not the copy" );
 
     if !correct( &test_bag, 5 )
     {
@@ -238,7 +274,7 @@ fn test2() -> u8
     }
 
 
-    println!( "Copy constructor seems okay." );
+    println_test!( "Copy constructor seems okay." );
     POINTS[ 2 ]
 }
 
@@ -253,7 +289,7 @@ fn test3() -> u8
     let oldbytes;
     let newbytes;
 
-    println!( "A. Testing that assignment operator works okay for empty bag..." );
+    println_test!( "A. Testing that assignment operator works okay for empty bag..." );
     let mut copy1 = Bag::new();
     copy1.insert( 1 );
     copy1 = test_bag.clone();
@@ -264,7 +300,7 @@ fn test3() -> u8
     }
 
 
-    println!( "B. Testing assignment operator with 4-item bag..." );
+    println_test!( "B. Testing assignment operator with 4-item bag..." );
     test_bag.insert( 1 );
     test_bag.insert( 1 );
     test_bag.insert( 1 );
@@ -272,22 +308,22 @@ fn test3() -> u8
     let mut copy2 = Bag::new();
     copy2 = test_bag.clone();
     test_bag.insert( 1 ); // Alter the original, but not the copy
-    println!( "   altering original by an insertion..." );
+    println_test!( "   altering original by an insertion..." );
 
     if test_bag.occurrences( 1 ) != 5 || copy2.occurrences( 1 ) != 4
     {
-        println!( "Test failed." );
+        println_test!( "Test failed." );
         return 0;
     }
 
-    println!( "Test passed.\n   testing size of assigned to..." );
+    println_test!( "Test passed.\n   testing size of assigned to..." );
 
     if !correct( &copy2, 4 )
     {
         return 0;
     }
 
-    println!( "   testing size of original..." );
+    println_test!( "   testing size of original..." );
 
     if !correct( &test_bag, 5 )
     {
@@ -295,7 +331,7 @@ fn test3() -> u8
     }
 
 
-    print!( "C. Testing assignment operator for a self-assignment..." );
+    print_test!( "C. Testing assignment operator for a self-assignment..." );
 
     let mut hasher = std::collections::hash_map::DefaultHasher::new();
     oldbytes = std::hash::Hash::hash( &test_bag, &mut hasher );
@@ -305,16 +341,16 @@ fn test3() -> u8
 
     if oldbytes == newbytes
     {
-        println!( "passed." );
+        println_test!( "passed." );
     }
     else
     {
-        println!( "failed." );
+        println_test!( "failed." );
         return 0;
     }
 
 
-    println!( "Assignment operator seems okay." );
+    println_test!( "Assignment operator seems okay." );
     POINTS[ 3 ]
 }
 
@@ -328,7 +364,7 @@ fn test4() -> u8
 {
     let mut test_bag = Bag::new();
 
-    print!( "Testing erase from empty bag (should have no effect) ..." );
+    print_test!( "Testing erase from empty bag (should have no effect) ..." );
     test_bag.erase( 0 );
 
     if !correct( &test_bag, 0 )
@@ -337,7 +373,7 @@ fn test4() -> u8
     }
 
         
-    println!( "Inserting these: 8 6 10 1 7 10 15 3 13 2 5 11 14 4 12" );
+    println_test!( "Inserting these: 8 6 10 1 7 10 15 3 13 2 5 11 14 4 12" );
     test_bag.insert(  8 );
     test_bag.insert(  6 );
     test_bag.insert( 10 );
@@ -360,25 +396,25 @@ fn test4() -> u8
     }
 
 
-    println!("Now testing capacity -- should be 16" );
+    println_test!("Now testing capacity -- should be 16" );
 
     if test_bag.get_capacity() == 16
     {
-        println!( "Test passed.\n" );
+        println_test!( "Test passed.\n" );
     }
     else
     {
-        println!( "Test failed." );
-        println!( "{:?}\n", test_bag );
+        println_test!( "Test failed." );
+        println_test!( "{:?}\n", test_bag );
         return 0;
     }
 
 
-    println!( "Erasing 0 (which is not in bag, so bag should be unchanged) ..." );
+    println_test!( "Erasing 0 (which is not in bag, so bag should be unchanged) ..." );
 
     if test_bag.erase_one( 0 )
     {
-        println!( "Test failed" );
+        println_test!( "Test failed" );
         return 0;
     }
 
@@ -388,7 +424,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 6 ..." );
+    print_test!( "Erasing the 6 ..." );
     test_bag.erase( 6 );
 
     if !correct( &test_bag, 14 )
@@ -397,11 +433,11 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing one 10 ..." );
+    print_test!( "Erasing one 10 ..." );
 
     if !test_bag.erase_one( 10 )
     {
-        println!( "Test failed" );
+        println_test!( "Test failed" );
         return 0;
     }
 
@@ -411,7 +447,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 1 ..." );
+    print_test!( "Erasing the 1 ..." );
     test_bag.erase( 1 );
 
     if !correct( &test_bag, 12 )
@@ -420,7 +456,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 15 ..." );
+    print_test!( "Erasing the 15 ..." );
     test_bag.erase( 15 );
 
     if !correct( &test_bag, 11 )
@@ -429,7 +465,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 5 ..." );
+    print_test!( "Erasing the 5 ..." );
     test_bag.erase( 5 );
 
     if !correct( &test_bag, 10 )
@@ -438,7 +474,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 11 ..." );
+    print_test!( "Erasing the 11 ..." );
     test_bag.erase( 11 );
 
     if !correct( &test_bag, 9 )
@@ -447,7 +483,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 3 ..." );
+    print_test!( "Erasing the 3 ..." );
     test_bag.erase( 3 );
 
     if !correct( &test_bag, 8 )
@@ -456,7 +492,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 13 ..." );
+    print_test!( "Erasing the 13 ..." );
     test_bag.erase( 13 );
 
     if !correct( &test_bag, 7 )
@@ -465,7 +501,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 2 ..." );
+    print_test!( "Erasing the 2 ..." );
     test_bag.erase( 2 );
 
     if !correct( &test_bag, 6 )
@@ -474,7 +510,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the one and only 14 ..." );
+    print_test!( "Erasing the one and only 14 ..." );
     test_bag.erase_one( 14 );
 
     if !correct( &test_bag, 5 )
@@ -483,7 +519,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 4 ..." );
+    print_test!( "Erasing the 4 ..." );
     test_bag.erase( 4 );
 
     if !correct( &test_bag, 4 )
@@ -492,7 +528,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 12 ..." );
+    print_test!( "Erasing the 12 ..." );
     test_bag.erase( 12 );
 
     if !correct( &test_bag, 3 )
@@ -501,7 +537,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 8 ..." );
+    print_test!( "Erasing the 8 ..." );
     test_bag.erase( 8 );
 
     if !correct( &test_bag, 2 )
@@ -510,7 +546,7 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the 7 ..." );
+    print_test!( "Erasing the 7 ..." );
     test_bag.erase( 7 );
 
     if !correct( &test_bag, 1 )
@@ -519,11 +555,11 @@ fn test4() -> u8
     }
 
 
-    print!( "Erasing the other 10 ..." );
+    print_test!( "Erasing the other 10 ..." );
 
     if !test_bag.erase_one( 10 )
     {
-        println!( "Test failed ..." );
+        println_test!( "Test failed ..." );
         return 0;
     }
 
@@ -533,40 +569,40 @@ fn test4() -> u8
     }
 
 
-    print!( "Testing capacity again..." );
+    print_test!( "Testing capacity again..." );
 
     if test_bag.get_capacity() != 16
     {
-        println!( "Test failed.\n{:?}\n", test_bag );
+        println_test!( "Test failed.\n{:?}\n", test_bag );
         return 0;
     }
 
 
-    println!( "Now trimming to size" );
+    println_test!( "Now trimming to size" );
     test_bag.trim_to_size();
 
     if test_bag.get_capacity() != 1
     {
-        println!( "Test failed.\n\n{:?}", test_bag );
+        println_test!( "Test failed.\n\n{:?}", test_bag );
         return 0;
     }
 
-    println!( "Test passed.\n" );
+    println_test!( "Test passed.\n" );
 
 
-    println!( "Now trimming to size again" );
+    println_test!( "Now trimming to size again" );
     test_bag.trim_to_size();
 
     if test_bag.get_capacity() != 1
     {
-        println!( "Test failed.\n\n{:?}", test_bag );
+        println_test!( "Test failed.\n\n{:?}", test_bag );
         return 0;
     }
 
-    println!( "Test passed.\n" );
+    println_test!( "Test passed.\n" );
 
 
-    print!( "Inserting value 5000 into the bag ... \nInserting three 5's into the bag and then erasing all of them ..." );
+    print_test!( "Inserting value 5000 into the bag ... \nInserting three 5's into the bag and then erasing all of them ..." );
     test_bag.insert( 5000 );
     test_bag.insert( 5 ); 
     test_bag.insert( 5 );
@@ -579,7 +615,7 @@ fn test4() -> u8
     }
 
     
-    println!( "Erase functions seem okay." );
+    println_test!( "Erase functions seem okay." );
     POINTS[ 4 ]
 }
 
@@ -595,7 +631,7 @@ fn test5() -> u8
     let mut test_bag3 = Bag::new();
 
 
-    println!( "Inserting 2000 1's into test_bag1 and 2000 2's into test_bag2" );
+    println_test!( "Inserting 2000 1's into test_bag1 and 2000 2's into test_bag2" );
 
     for _ in 0..2000
     {
@@ -603,37 +639,37 @@ fn test5() -> u8
         test_bag2.insert( 2 );
     }
 
-    println!( "Now testing the += function ..." );
+    println_test!( "Now testing the += function ..." );
     test_bag1 += test_bag2.clone();
-    println!( "  and now testing for occurrences of 1's and 2's in test_bag1 ..." );
+    println_test!( "  and now testing for occurrences of 1's and 2's in test_bag1 ..." );
 
     if test_bag1.occurrences( 1 ) == 2000 && test_bag2.occurrences( 2 ) == 2000
     {
-        println!( "Test passed.\n" );
+        println_test!( "Test passed.\n" );
     }
     else
     {
-        println!( "Test failed.\n" );
+        println_test!( "Test failed.\n" );
         return 0;
     }
 
 
-    println!( "Now testing the + function ..." );
+    println_test!( "Now testing the + function ..." );
     test_bag3 = test_bag2.clone() + test_bag2.clone();
-    println!( "  and now testing for occurrences of 2's in test_bag3 ..." );
+    println_test!( "  and now testing for occurrences of 2's in test_bag3 ..." );
 
     if test_bag3.occurrences( 2 ) == 4000
     {
-        println!( "Test passed.\n" );
+        println_test!( "Test passed.\n" );
     }
     else
     {
-        println!( "Test failed.\n" );
+        println_test!( "Test failed.\n" );
         return 0;
     }
 
 
-    println!( "+= and + functions seem okay." );
+    println_test!( "+= and + functions seem okay." );
     POINTS[ 5 ]
 }
 
@@ -641,19 +677,19 @@ fn run_a_test( number: u8, message: &str, test_function: fn() -> u8, max: u8 ) -
 {
     let result;
     
-    println!( "\nSTART OF TEST {}:\n{} ({} points).", number, message, max );
+    println_test!( "\nSTART OF TEST {}:\n{} ({} points).", number, message, max );
     result = test_function();
 
     if result > 0
     {
-        println!( "Test {} got {} points out of a possible {}.", number, result, max );
+        println_test!( "Test {} got {} points out of a possible {}.", number, result, max );
     }
     else
     {
-        println!( "Test {} failed.", number );
+        println_test!( "Test {} failed.", number );
     }
 
-    println!( "END OF TEST {}.\n", number );    
+    println_test!( "END OF TEST {}.\n", number );    
 
     result
 }
@@ -668,33 +704,48 @@ fn bagexam()
 {
     let mut sum = 0;
     //let reply;
-    //let done_erase;
-    //let done_union;
+    let mut done_erase = false;
+    let mut done_union = false;
     
-    println!( "Running {}", DESCRIPTION[ 0 ] );
-    /*print!( "Have you implemented erase yet? [Y or N]: ";
-    cin >> reply;
-    done_erase = (reply == 'Y' || reply == 'y');
-    println!( "Have you implemented += and + yet? [Y or N]: ";
-    cin >> reply;
-    done_union = (reply == 'Y' || reply == 'y');*/
+    println_test!( "Running {}", DESCRIPTION[ 0 ] );
+
+    if unsafe { TAKE_INPUT }
+    {
+        print_test!( "Have you implemented erase yet? [Y or N]: " );
+
+        let mut line = read_input!();
+
+        if line == "Y\n" || line == "y\n"
+        {
+            done_erase = true;
+        }
+
+        print_test!( "Have you implemented += and + yet? [Y or N]: " );
+
+        line = read_input!();
+
+        if line == "Y\n" || line == "y\n"
+        {
+            done_union = true;
+        }
+    }
 
 
     sum += run_a_test( 1, DESCRIPTION[ 1 ], test1, POINTS[ 1 ] );
     sum += run_a_test( 2, DESCRIPTION[ 2 ], test2, POINTS[ 2 ] );
     sum += run_a_test( 3, DESCRIPTION[ 3 ], test3, POINTS[ 3 ] );
 
-    //if done_erase
+    if done_erase || unsafe { !TAKE_INPUT }
     {
         sum += run_a_test( 4, DESCRIPTION[ 4 ], test4, POINTS[ 4 ] );
     }
-    //if done_union
+    if done_union || unsafe { !TAKE_INPUT }
     {
         sum += run_a_test( 5, DESCRIPTION[ 5 ], test5, POINTS[ 5 ] );
     }
 
 
-    println!( "If you submit your bag to Prof. Haiduk now, you will have\n{} points out of the {} points from this test program.", sum, POINTS[ 0 ] );
+    println_test!( "If you submit your bag to Prof. Haiduk now, you will have\n{} points out of the {} points from this test program.", sum, POINTS[ 0 ] );
 
     assert!( sum == POINTS[ 0 ] );
 }
