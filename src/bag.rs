@@ -1,6 +1,7 @@
 // File: bag.rs 
 
-use std;
+#![ allow( dead_code ) ]
+
 use std::cmp::PartialEq;
 
 /// An DoubleArrayBag is an unordered collection of double numbers and in which
@@ -16,7 +17,7 @@ use std::cmp::PartialEq;
 ///    H. Paul Haiduk with credit given to Michael Main
 ///
 /// version:
-///    2.March.2018
+///    8.March.2018
 
 // #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Bag<Type: PartialEq + Clone + Default>
@@ -69,6 +70,21 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
             Bag { data: vec![ Type::default(); initial_capacity ], used: 0 }
         }
     }
+
+    /// Initialize a new bag as an exact copy of source
+    /// Parameter: source
+    ///     A reference to a bag that is to be copied
+    /// Postcondition:
+    ///     This bag is a copy of source and has a capacity of
+    ///     of number of elements in source. Subsequent changes to
+    ///     the copy will not affect the original, nor vice versa.
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array
+
+    pub fn from_bag( source: &Bag<Type> ) -> Self
+    {
+        Bag { data: source.data.clone() , used: source.used }
+    }
     
     /// Potentially increase capacity of this bag
     /// Parameter: new_capacity
@@ -87,7 +103,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     pub fn ensure_capacity( &mut self, mut new_capacity: usize )
     {
         if new_capacity <= 0
-        {
+        { // data.len() will always be greater than zero, why is this needed?
             panic!( "new_capacity < 1" );
         }
         else
@@ -217,7 +233,9 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     pub fn occurrences( &self, target: Type ) -> usize
     {
         let mut return_count = 0;
-      
+
+        // This loop will only loop though the full range of
+        //  values from 0 to self.used
         for index in 0..self.used
         {
             if target == self.data[ index ]
@@ -259,13 +277,13 @@ impl<Type: PartialEq + Clone + Default> Default for Bag<Type>
 
     fn default() -> Self
     {
-        Bag::new()
+        Bag { data: vec![ Type::default(); 1 ], used: 0 }
     }
 }
 
 impl<Type: PartialEq + Clone + Default> Clone for Bag<Type>
 {
-    /// Initialize a new bag as an exact copy of source
+    /// Generate a copy of this bag.
     /// Postcondition:
     ///     The clone is not the same object as the sourse.
     ///     The clone is the same type as the sourse.
@@ -326,7 +344,7 @@ impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> std::ops::AddAssign for Bag<Type>
+impl<Type: PartialEq + Clone + Default> ::std::ops::AddAssign for Bag<Type>
 {
     /// Add the contents of another bag to this bag.
     /// Parameter: self
@@ -354,7 +372,7 @@ impl<Type: PartialEq + Clone + Default> std::ops::AddAssign for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> std::ops::Add for Bag<Type>
+impl<Type: PartialEq + Clone + Default> ::std::ops::Add for Bag<Type>
 {
     /// Create a new bag that contains all the elements from two other bags
     /// Parameter: self
@@ -383,7 +401,7 @@ impl<Type: PartialEq + Clone + Default> std::ops::Add for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default + std::fmt::Debug> std::fmt::Debug for Bag<Type>
+impl<Type: PartialEq + Clone + Default + ::std::fmt::Debug> ::std::fmt::Debug for Bag<Type>
 {
     /// This method renders the bag's contents into a human readable form
     /// Precondition:
@@ -391,7 +409,7 @@ impl<Type: PartialEq + Clone + Default + std::fmt::Debug> std::fmt::Debug for Ba
     /// Postcondition:
     ///     The bag is not altered by this method
 
-    fn fmt( &self, fmt: &mut std::fmt::Formatter ) -> std::fmt::Result
+    fn fmt( &self, fmt: &mut ::std::fmt::Formatter ) -> ::std::fmt::Result
     {
         write!( fmt, "Bag with {:?} elements: [", self.used )?;
 
@@ -415,10 +433,10 @@ impl<Type: PartialEq + Clone + Default + std::fmt::Debug> std::fmt::Debug for Ba
     }
 }
 
-impl<Type: PartialEq + Clone + Default + std::hash::Hash> std::hash::Hash for Bag<Type>
+impl<Type: PartialEq + Clone + Default + ::std::hash::Hash> ::std::hash::Hash for Bag<Type>
 {
     // Used for places that need a hash, like a hashmap
-    fn hash<HashType: std::hash::Hasher>( &self, state: &mut HashType )
+    fn hash<HashType: ::std::hash::Hasher>( &self, state: &mut HashType )
     {
         self.used.hash( state );
         self.data.hash( state );
