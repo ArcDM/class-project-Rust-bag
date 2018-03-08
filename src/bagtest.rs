@@ -3,7 +3,6 @@
 // a binary search tree.
 
 use bag::Bag;
-use std::ascii::AsciiExt;
 use std::io::Write;
 
 macro_rules! read_input
@@ -96,7 +95,7 @@ fn show_bags( bag1: &Bag<f32>, bag2: &Bag<f32> )
 fn copybag( input_bag: &Bag<f32> ) -> Bag<f32>
 // Postcondition: The return value is a copy of b.
 {
-    input_bag.clone()
+    Bag::from_bag( input_bag )
 }
 
 fn get_number() -> f32
