@@ -47,13 +47,13 @@ fn correct<Type: PartialEq + Clone + Default>( test_bag: &Bag<Type> , n: usize )
 {
     if test_bag.size( ) == n
     {
-        println!( "Test passed." );
+        println!( "Test passed.\n" );
         true
         
     }
     else
     {
-        println!( "Test failed." );
+        println!( "Test failed.\n" );
         false
     }
 }
@@ -195,7 +195,7 @@ fn test2() -> u8
     let mut test_bag = Bag::new();
 
     println!( "A. Testing that copy constructor works okay for empty bag..." );
-    let copy1 = test_bag.clone();
+    let copy1 = Bag::from_bag( &test_bag );
 
     if !correct( &copy1, 0 )
     {
@@ -203,12 +203,12 @@ fn test2() -> u8
     }
 
 
-    println!( "B. Testing copy constructor with 4-item bag..." );
+    print!( "B. Testing copy constructor with 4-item bag..." );
     test_bag.insert( 1 );
     test_bag.insert( 1 );
     test_bag.insert( 1 );
     test_bag.insert( 1 );
-    let copy2 = test_bag.clone();
+    let copy2 = Bag::from_bag( &test_bag );
     println!( "   and now testing the == method..." );
 
     if !( test_bag == copy2 ) || !( copy2 == test_bag )
@@ -250,8 +250,8 @@ fn test2() -> u8
 fn test3() -> u8
 {
     let mut test_bag = Bag::new();
-    //char *oldbytes = new char[sizeof(bag)];
-    //char *newbytes = new char[sizeof(bag)];
+    let oldbytes;
+    let newbytes;
 
     println!( "A. Testing that assignment operator works okay for empty bag..." );
     let mut copy1 = Bag::new();
@@ -295,12 +295,12 @@ fn test3() -> u8
     }
 
 
-    println!( "C. Testing assignment operator for a self-assignment..." );
+    print!( "C. Testing assignment operator for a self-assignment..." );
 
     let mut hasher = std::collections::hash_map::DefaultHasher::new();
-    let oldbytes = std::hash::Hash::hash( &test_bag, &mut hasher );
+    oldbytes = std::hash::Hash::hash( &test_bag, &mut hasher );
     test_bag = test_bag;
-    let newbytes = std::hash::Hash::hash( &test_bag, &mut hasher );
+    newbytes = std::hash::Hash::hash( &test_bag, &mut hasher );
 
 
     if oldbytes == newbytes
@@ -328,7 +328,7 @@ fn test4() -> u8
 {
     let mut test_bag = Bag::new();
 
-    println!( "Testing erase from empty bag (should have no effect) ..." );
+    print!( "Testing erase from empty bag (should have no effect) ..." );
     test_bag.erase( 0 );
 
     if !correct( &test_bag, 0 )
@@ -374,7 +374,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing 0 (which is not in bag, so bag should be unchanged) ...\n" );
+    println!( "Erasing 0 (which is not in bag, so bag should be unchanged) ..." );
 
     if test_bag.erase_one( 0 )
     {
@@ -388,7 +388,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 6 ..." );
+    print!( "Erasing the 6 ..." );
     test_bag.erase( 6 );
 
     if !correct( &test_bag, 14 )
@@ -397,7 +397,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing one 10 ..." );
+    print!( "Erasing one 10 ..." );
 
     if !test_bag.erase_one( 10 )
     {
@@ -411,7 +411,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 1 ..." );
+    print!( "Erasing the 1 ..." );
     test_bag.erase( 1 );
 
     if !correct( &test_bag, 12 )
@@ -420,7 +420,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 15 ..." );
+    print!( "Erasing the 15 ..." );
     test_bag.erase( 15 );
 
     if !correct( &test_bag, 11 )
@@ -429,7 +429,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 5 ..." );
+    print!( "Erasing the 5 ..." );
     test_bag.erase( 5 );
 
     if !correct( &test_bag, 10 )
@@ -438,7 +438,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 11 ..." );
+    print!( "Erasing the 11 ..." );
     test_bag.erase( 11 );
 
     if !correct( &test_bag, 9 )
@@ -447,7 +447,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 3 ..." );
+    print!( "Erasing the 3 ..." );
     test_bag.erase( 3 );
 
     if !correct( &test_bag, 8 )
@@ -456,7 +456,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 13 ..." );
+    print!( "Erasing the 13 ..." );
     test_bag.erase( 13 );
 
     if !correct( &test_bag, 7 )
@@ -465,7 +465,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 2 ..." );
+    print!( "Erasing the 2 ..." );
     test_bag.erase( 2 );
 
     if !correct( &test_bag, 6 )
@@ -474,7 +474,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the one and only 14 ..." );
+    print!( "Erasing the one and only 14 ..." );
     test_bag.erase_one( 14 );
 
     if !correct( &test_bag, 5 )
@@ -483,7 +483,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 4 ..." );
+    print!( "Erasing the 4 ..." );
     test_bag.erase( 4 );
 
     if !correct( &test_bag, 4 )
@@ -492,7 +492,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 12 ..." );
+    print!( "Erasing the 12 ..." );
     test_bag.erase( 12 );
 
     if !correct( &test_bag, 3 )
@@ -501,7 +501,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 8 ..." );
+    print!( "Erasing the 8 ..." );
     test_bag.erase( 8 );
 
     if !correct( &test_bag, 2 )
@@ -510,7 +510,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the 7 ..." );
+    print!( "Erasing the 7 ..." );
     test_bag.erase( 7 );
 
     if !correct( &test_bag, 1 )
@@ -519,7 +519,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Erasing the other 10 ..." );
+    print!( "Erasing the other 10 ..." );
 
     if !test_bag.erase_one( 10 )
     {
@@ -533,7 +533,7 @@ fn test4() -> u8
     }
 
 
-    println!( "Testing capacity again..." );
+    print!( "Testing capacity again..." );
 
     if test_bag.get_capacity() != 16
     {
@@ -566,7 +566,7 @@ fn test4() -> u8
     println!( "Test passed.\n" );
 
 
-    println!( "Inserting value 5000 into the bag ... \n\nInserting three 5's into the bag and then erasing all of them ..." );
+    print!( "Inserting value 5000 into the bag ... \nInserting three 5's into the bag and then erasing all of them ..." );
     test_bag.insert( 5000 );
     test_bag.insert( 5 ); 
     test_bag.insert( 5 );
@@ -650,10 +650,11 @@ fn run_a_test( number: u8, message: &str, test_function: fn() -> u8, max: u8 ) -
     }
     else
     {
-        println!( "Test {} failed.\nEND OF TEST {}.\n", number, number );
+        println!( "Test {} failed.", number );
     }
 
-    
+    println!( "END OF TEST {}.\n", number );    
+
     result
 }
 
@@ -663,9 +664,6 @@ fn run_a_test( number: u8, message: &str, test_function: fn() -> u8, max: u8 ) -
 ///   earned from the tests.
 /// **************************************************************************
 #[ test ]
-#[ allow( unused_assignments ) ]
-#[ allow( dead_code ) ]
-//#[nocapture]
 fn bagexam()
 {
     let mut sum = 0;
@@ -674,7 +672,7 @@ fn bagexam()
     //let done_union;
     
     println!( "Running {}", DESCRIPTION[ 0 ] );
-    /*println!( "Have you implemented erase yet? [Y or N]: ";
+    /*print!( "Have you implemented erase yet? [Y or N]: ";
     cin >> reply;
     done_erase = (reply == 'Y' || reply == 'y');
     println!( "Have you implemented += and + yet? [Y or N]: ";
