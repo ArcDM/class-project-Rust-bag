@@ -9,14 +9,12 @@
 // constants POINTS[1], POINTS[2]...
 //
 
-//#![ RUST_TEST_NOCAPTURE = 1 ]
 #![ allow( unused_assignments ) ]
 #![ allow( dead_code ) ]
 
 extern crate rand;
 
 use bag::Bag;
-use std;
 use std::io::{self, Write};
 
 macro_rules! print_test {
@@ -44,8 +42,20 @@ macro_rules! read_input {
     }};
 }
 
+#[ test ]
+#[ ignore ]
+fn dont_ask()
+{
+    main_( false );
+}
+
+#[ test ]
+fn bagexam()
+{
+    main_( true );
+}
+
 // Descriptions and points for each of the tests:
-static mut TAKE_INPUT: bool = true;
 const MANY_TESTS: u8 = 5;
 const POINTS: [ u8; 6 ] = [
     100, // Total points for all tests.
@@ -64,15 +74,6 @@ const DESCRIPTION: [ &'static str; 6 ] = [
     "Testing erase and erase_one functions",
     "Testing += method and non-instance method +"
 ];
-
-#[ allow( non_snake_case ) ]
-#[test]
-#[ignore]
-fn Dont_Ask()
-{
-    unsafe{ TAKE_INPUT = false; }
-    bagexam();
-}
 
 /// **************************************************************************
 ///   This function determines if the bag (test) is "correct" according to
@@ -333,10 +334,10 @@ fn test3() -> u8
 
     print_test!( "C. Testing assignment operator for a self-assignment..." );
 
-    let mut hasher = std::collections::hash_map::DefaultHasher::new();
-    oldbytes = std::hash::Hash::hash( &test_bag, &mut hasher );
+    let mut hasher = ::std::collections::hash_map::DefaultHasher::new();
+    oldbytes = ::std::hash::Hash::hash( &test_bag, &mut hasher );
     test_bag = test_bag;
-    newbytes = std::hash::Hash::hash( &test_bag, &mut hasher );
+    newbytes = ::std::hash::Hash::hash( &test_bag, &mut hasher );
 
 
     if oldbytes == newbytes
@@ -699,17 +700,15 @@ fn run_a_test( number: u8, message: &str, test_function: fn() -> u8, max: u8 ) -
 ///   Calls all tests and prints the sum of all points
 ///   earned from the tests.
 /// **************************************************************************
-#[ test ]
-fn bagexam()
+fn main_( take_input: bool )
 {
     let mut sum = 0;
-    //let reply;
     let mut done_erase = false;
     let mut done_union = false;
     
     println_test!( "Running {}", DESCRIPTION[ 0 ] );
 
-    if unsafe { TAKE_INPUT }
+    if take_input
     {
         print_test!( "Have you implemented erase yet? [Y or N]: " );
 
@@ -735,11 +734,11 @@ fn bagexam()
     sum += run_a_test( 2, DESCRIPTION[ 2 ], test2, POINTS[ 2 ] );
     sum += run_a_test( 3, DESCRIPTION[ 3 ], test3, POINTS[ 3 ] );
 
-    if done_erase || unsafe { !TAKE_INPUT }
+    if done_erase || !take_input
     {
         sum += run_a_test( 4, DESCRIPTION[ 4 ], test4, POINTS[ 4 ] );
     }
-    if done_union || unsafe { !TAKE_INPUT }
+    if done_union || !take_input
     {
         sum += run_a_test( 5, DESCRIPTION[ 5 ], test5, POINTS[ 5 ] );
     }
@@ -749,4 +748,3 @@ fn bagexam()
 
     assert!( sum == POINTS[ 0 ] );
 }
-
