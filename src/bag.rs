@@ -439,6 +439,6 @@ impl<Type: PartialEq + Clone + Default + ::std::hash::Hash> ::std::hash::Hash fo
     fn hash<HashType: ::std::hash::Hasher>( &self, state: &mut HashType )
     {
         self.used.hash( state );
-        self.data.hash( state );
+        self.data[ ..self.used ].hash( state );
     }
 }
