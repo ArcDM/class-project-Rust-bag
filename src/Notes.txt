@@ -1,6 +1,6 @@
 bag:
     -I implemented the bag module converted from the Java bag
-     class. My implementation jumped strait into generic typing,
+     class. My implementation jumped straight into generic typing,
      which wasn't bad seeing as we have done generics in other
      lanuagesbefore.
 
@@ -48,7 +48,7 @@ bag:
      Comparing hashes for types without hashing would be
      impossible, which is a problem for a few types like
      f32 and f64. Quite infuriating. Thus, to able to use as
-     many types as possible I opted for omited the hashing check.
+     many types as possible I opted for omitting the hashing check.
         An alternative would have been to be able to use a
         conditional check based on if the trait was implemented
         for the generic type used, which after hours of searching
