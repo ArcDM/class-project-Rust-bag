@@ -1,0 +1,34 @@
+Implemented:
+    4.4.2018
+    Assess functions in bag for a different implementation
+        occurrences()
+            Similar to the implementation observed from another student.
+        Debug::fmt() <generic>
+            All for nawt until I found the for_each() iterator function.
+        Add::add()
+            Couldnt use iterators but the code is nicer none the less.
+        AddAssign::add_assign()
+            I considered using what I used in Add::add()
+                but I believe my existing code is more efficient.
+        PartialEq::eq()
+            I used the built in slice eq trait, making it much simpler.
+        trim_to_size
+            A small expression change.
+        erase_one
+            Used iterators and pattern matching
+        varius methods for reference parameters
+            Parameters that are copyable, like usize, were left as non references.
+
+    Added Clone::clone_from() method for completeness
+
+In_Combat:
+    <None>
+
+Planned:
+    Restructure of bagexam.rs to fit more of a testing implementation
+    Make a f64 bag
+
+Abandonded:
+    Assess functions in bag for a different implementation
+        erase
+            Not only a problem in efficientcy, but also a problem of iterative implementation
