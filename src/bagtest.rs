@@ -4,6 +4,7 @@
 
 use bag::Bag;
 use std::io::Write;
+use std::ascii::AsciiExt;
 
 macro_rules! read_input
 {
@@ -40,12 +41,12 @@ pub fn bagtest()
             'c' => { bag2 = copybag( &bag1 ); }
             'S' | 's' => { println!( "The bags' sizes are {} and {}",
                                         bag1.size(), bag2.size() ); }
-            'I' => { bag1.insert( get_number() ); }
-            'i' => { bag2.insert( get_number() ); }
-            'R' => { bag1.erase( get_number() ); }
-            'r' => { bag2.erase( get_number() ); }
-            'X' => { bag1.erase_one( get_number() ); }
-            'x' => { bag2.erase_one( get_number() ); }
+            'I' => { bag1.insert( &get_number() ); }
+            'i' => { bag2.insert( &get_number() ); }
+            'R' => { bag1.erase( &get_number() ); }
+            'r' => { bag2.erase( &get_number() ); }
+            'X' => { bag1.erase_one( &get_number() ); }
+            'x' => { bag2.erase_one( &get_number() ); }
             'O' | 'o' => { show_bags( &bag1, &bag2 ); }
             'q' | 'Q' => { println!( "Ridicule is the best test of truth." ); }
             val => { println!( "{} is invalid. Sorry.", val ); }
