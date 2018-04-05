@@ -118,7 +118,7 @@ fn test1() -> u8
 
     println_test!( "{}. Adding the number 4 to the bag, and then testing\n   size.", test_letter as char );
     test_letter += 1;
-    test_bag.insert( 4 );
+    test_bag.insert( &4 );
 
     if !correct( &test_bag, 1 )
     {
@@ -128,7 +128,7 @@ fn test1() -> u8
 
     println_test!( "{}. Inserting the number 2 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
-    test_bag.insert( 2 );
+    test_bag.insert( &2 );
 
 
     if !correct( &test_bag, 2 )
@@ -139,7 +139,7 @@ fn test1() -> u8
 
     println_test!( "{}. Inserting the number 1 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
-    test_bag.insert( 1 );
+    test_bag.insert( &1 );
 
     if !correct( &test_bag, 3 )
     {
@@ -149,7 +149,7 @@ fn test1() -> u8
 
     println_test!( "{}. Inserting the number 3 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
-    test_bag.insert( 3 );
+    test_bag.insert( &3 );
 
     if !correct( &test_bag, 4 )
     {
@@ -159,7 +159,7 @@ fn test1() -> u8
 
     println_test!( "{}. Inserting another 2 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
-    test_bag.insert( 2 );
+    test_bag.insert( &2 );
 
     if !correct( &test_bag, 5 )
     {
@@ -168,7 +168,7 @@ fn test1() -> u8
 
     println_test!( "   Then checking occurrences of 2." );
 
-    if test_bag.occurrences( 2 ) == 2
+    if test_bag.occurrences( &2 ) == 2
     {
         println_test!( "Test passed." );
     }
@@ -180,9 +180,9 @@ fn test1() -> u8
 
     println_test!( "{}. Inserting the numbers 5, 6, and 7 into the bag.\n   Then checking size.", test_letter as char );
     test_letter += 1;
-    test_bag.insert( 5 );
-    test_bag.insert( 6 );
-    test_bag.insert( 7 );
+    test_bag.insert( &5 );
+    test_bag.insert( &6 );
+    test_bag.insert( &7 );
 
     if !correct( &test_bag, 8 )
     {
@@ -192,10 +192,10 @@ fn test1() -> u8
 
     println_test!( "{}. Inserting two more 2's into the bag.\n   and then checking occurrences of 2's\n", test_letter as char );
     test_letter += 1;
-    test_bag.insert( 2 );
-    test_bag.insert( 2 );
+    test_bag.insert( &2 );
+    test_bag.insert( &2 );
 
-    if test_bag.occurrences( 2 ) == 4
+    if test_bag.occurrences( &2 ) == 4
     {
         println_test!( "Test passed." );
     }
@@ -209,7 +209,7 @@ fn test1() -> u8
 
     for _ in 0..TEST_SIZE
     {
-        test_bag.insert( rand::random::<i16>() % 50 );
+        test_bag.insert( &( rand::random::<i16>() % 50 ) );
     }
 
     if !correct( &test_bag, TEST_SIZE + 10 )
@@ -241,10 +241,10 @@ fn test2() -> u8
 
 
     print_test!( "B. Testing copy constructor with 4-item bag..." );
-    test_bag.insert( 1 );
-    test_bag.insert( 1 );
-    test_bag.insert( 1 );
-    test_bag.insert( 1 );
+    test_bag.insert( &1 );
+    test_bag.insert( &1 );
+    test_bag.insert( &1 );
+    test_bag.insert( &1 );
     let copy2 = Bag::from_bag( &test_bag );
     println_test!( "   and now testing the == method..." );
 
@@ -259,7 +259,7 @@ fn test2() -> u8
     }
 
 
-    test_bag.insert( 1 ); // Alter the original, but not the copy
+    test_bag.insert( &1 ); // Alter the original, but not the copy
     println_test!( "C. Then checking size of copy" );
 
     if !correct( &copy2, 4 )
@@ -292,7 +292,7 @@ fn test3() -> u8
 
     println_test!( "A. Testing that assignment operator works okay for empty bag..." );
     let mut copy1 = Bag::new();
-    copy1.insert( 1 );
+    copy1.insert( &1 );
     copy1 = test_bag.clone();
 
     if !correct( &copy1, 0 )
@@ -302,16 +302,16 @@ fn test3() -> u8
 
 
     println_test!( "B. Testing assignment operator with 4-item bag..." );
-    test_bag.insert( 1 );
-    test_bag.insert( 1 );
-    test_bag.insert( 1 );
-    test_bag.insert( 1 );
+    test_bag.insert( &1 );
+    test_bag.insert( &1 );
+    test_bag.insert( &1 );
+    test_bag.insert( &1 );
     let mut copy2 = Bag::new();
     copy2 = test_bag.clone();
-    test_bag.insert( 1 ); // Alter the original, but not the copy
+    test_bag.insert( &1 ); // Alter the original, but not the copy
     println_test!( "   altering original by an insertion..." );
 
-    if test_bag.occurrences( 1 ) != 5 || copy2.occurrences( 1 ) != 4
+    if test_bag.occurrences( &1 ) != 5 || copy2.occurrences( &1 ) != 4
     {
         println_test!( "Test failed." );
         return 0;
@@ -366,7 +366,7 @@ fn test4() -> u8
     let mut test_bag = Bag::new();
 
     print_test!( "Testing erase from empty bag (should have no effect) ..." );
-    test_bag.erase( 0 );
+    test_bag.erase( &0 );
 
     if !correct( &test_bag, 0 )
     {
@@ -375,21 +375,21 @@ fn test4() -> u8
 
         
     println_test!( "Inserting these: 8 6 10 1 7 10 15 3 13 2 5 11 14 4 12" );
-    test_bag.insert(  8 );
-    test_bag.insert(  6 );
-    test_bag.insert( 10 );
-    test_bag.insert(  1 );
-    test_bag.insert(  7 );
-    test_bag.insert( 10 );
-    test_bag.insert( 15 );
-    test_bag.insert(  3 );
-    test_bag.insert( 13 );
-    test_bag.insert(  2 );
-    test_bag.insert(  5 );
-    test_bag.insert( 11 );
-    test_bag.insert( 14 );
-    test_bag.insert(  4 );
-    test_bag.insert( 12 );
+    test_bag.insert( & 8 );
+    test_bag.insert( & 6 );
+    test_bag.insert( &10 );
+    test_bag.insert( & 1 );
+    test_bag.insert( & 7 );
+    test_bag.insert( &10 );
+    test_bag.insert( &15 );
+    test_bag.insert( & 3 );
+    test_bag.insert( &13 );
+    test_bag.insert( & 2 );
+    test_bag.insert( & 5 );
+    test_bag.insert( &11 );
+    test_bag.insert( &14 );
+    test_bag.insert( & 4 );
+    test_bag.insert( &12 );
 
     if !correct( &test_bag, 15 )
     {
@@ -413,7 +413,7 @@ fn test4() -> u8
 
     println_test!( "Erasing 0 (which is not in bag, so bag should be unchanged) ..." );
 
-    if test_bag.erase_one( 0 )
+    if test_bag.erase_one( &0 )
     {
         println_test!( "Test failed" );
         return 0;
@@ -426,7 +426,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 6 ..." );
-    test_bag.erase( 6 );
+    test_bag.erase( &6 );
 
     if !correct( &test_bag, 14 )
     {
@@ -436,7 +436,7 @@ fn test4() -> u8
 
     print_test!( "Erasing one 10 ..." );
 
-    if !test_bag.erase_one( 10 )
+    if !test_bag.erase_one( &10 )
     {
         println_test!( "Test failed" );
         return 0;
@@ -449,7 +449,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 1 ..." );
-    test_bag.erase( 1 );
+    test_bag.erase( &1 );
 
     if !correct( &test_bag, 12 )
     {
@@ -458,7 +458,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 15 ..." );
-    test_bag.erase( 15 );
+    test_bag.erase( &15 );
 
     if !correct( &test_bag, 11 )
     {
@@ -467,7 +467,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 5 ..." );
-    test_bag.erase( 5 );
+    test_bag.erase( &5 );
 
     if !correct( &test_bag, 10 )
     {
@@ -476,7 +476,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 11 ..." );
-    test_bag.erase( 11 );
+    test_bag.erase( &11 );
 
     if !correct( &test_bag, 9 )
     {
@@ -485,7 +485,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 3 ..." );
-    test_bag.erase( 3 );
+    test_bag.erase( &3 );
 
     if !correct( &test_bag, 8 )
     {
@@ -494,7 +494,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 13 ..." );
-    test_bag.erase( 13 );
+    test_bag.erase( &13 );
 
     if !correct( &test_bag, 7 )
     {
@@ -503,7 +503,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 2 ..." );
-    test_bag.erase( 2 );
+    test_bag.erase( &2 );
 
     if !correct( &test_bag, 6 )
     {
@@ -512,7 +512,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the one and only 14 ..." );
-    test_bag.erase_one( 14 );
+    test_bag.erase_one( &14 );
 
     if !correct( &test_bag, 5 )
     {
@@ -521,7 +521,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 4 ..." );
-    test_bag.erase( 4 );
+    test_bag.erase( &4 );
 
     if !correct( &test_bag, 4 )
     {
@@ -530,7 +530,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 12 ..." );
-    test_bag.erase( 12 );
+    test_bag.erase( &12 );
 
     if !correct( &test_bag, 3 )
     {
@@ -539,7 +539,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 8 ..." );
-    test_bag.erase( 8 );
+    test_bag.erase( &8 );
 
     if !correct( &test_bag, 2 )
     {
@@ -548,7 +548,7 @@ fn test4() -> u8
 
 
     print_test!( "Erasing the 7 ..." );
-    test_bag.erase( 7 );
+    test_bag.erase( &7 );
 
     if !correct( &test_bag, 1 )
     {
@@ -558,7 +558,7 @@ fn test4() -> u8
 
     print_test!( "Erasing the other 10 ..." );
 
-    if !test_bag.erase_one( 10 )
+    if !test_bag.erase_one( &10 )
     {
         println_test!( "Test failed ..." );
         return 0;
@@ -604,11 +604,11 @@ fn test4() -> u8
 
 
     print_test!( "Inserting value 5000 into the bag ... \nInserting three 5's into the bag and then erasing all of them ..." );
-    test_bag.insert( 5000 );
-    test_bag.insert( 5 ); 
-    test_bag.insert( 5 );
-    test_bag.insert( 5 );
-    test_bag.erase( 5 );
+    test_bag.insert( &5000 );
+    test_bag.insert( &5 ); 
+    test_bag.insert( &5 );
+    test_bag.insert( &5 );
+    test_bag.erase( &5 );
 
     if !correct( &test_bag, 1 )
     {
@@ -636,15 +636,15 @@ fn test5() -> u8
 
     for _ in 0..2000
     {
-        test_bag1.insert( 1 );
-        test_bag2.insert( 2 );
+        test_bag1.insert( &1 );
+        test_bag2.insert( &2 );
     }
 
     println_test!( "Now testing the += function ..." );
     test_bag1 += test_bag2.clone();
     println_test!( "  and now testing for occurrences of 1's and 2's in test_bag1 ..." );
 
-    if test_bag1.occurrences( 1 ) == 2000 && test_bag2.occurrences( 2 ) == 2000
+    if test_bag1.occurrences( &1 ) == 2000 && test_bag2.occurrences( &2 ) == 2000
     {
         println_test!( "Test passed.\n" );
     }
@@ -659,7 +659,7 @@ fn test5() -> u8
     test_bag3 = test_bag2.clone() + test_bag2.clone();
     println_test!( "  and now testing for occurrences of 2's in test_bag3 ..." );
 
-    if test_bag3.occurrences( 2 ) == 4000
+    if test_bag3.occurrences( &2 ) == 4000
     {
         println_test!( "Test passed.\n" );
     }
