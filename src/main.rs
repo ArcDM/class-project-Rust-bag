@@ -1,5 +1,11 @@
-pub mod bag;
+
+#![ allow( dead_code ) ]
+mod bag;
+mod bagtest;
+
+#[cfg(test)]
+mod bagexam;
 
 fn main() {
-    println!("Hello, world!");
+    ::bagtest::bagtest();
 }
