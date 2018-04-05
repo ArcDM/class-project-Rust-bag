@@ -4,9 +4,11 @@
 
 use std::cmp::PartialEq;
 
-/// An DoubleArrayBag is an unordered collection of double numbers and in which
-/// the same number may appear multiple times.  The bag's capacity can grow as
+/// An Bag is an unsorted, ordered collection of generic types and in which
+/// the same number may appear multiple times. The bag's capacity can grow as
 /// needed and can be reduced.
+///
+/// The type used must have the traits PartialEq, Clone, and Default.
 ///
 /// note:
 ///   Because of the slow linear algorithms of this
@@ -17,18 +19,17 @@ use std::cmp::PartialEq;
 ///    H. Paul Haiduk with credit given to Michael Main
 ///
 /// version:
-///    8.March.2018
+///    4.April.2018
 
-// #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Bag<Type: PartialEq + Clone + Default>
 {
-   // Invariant of the DoubleArrayBag class:
-   //   1. The number of elements in the bag is in the instance variable 
-   //      used, which is no more than data.length.
-   //   2. For an empty bag, we do not care what is stored in any of data;
-   //      for a non-empty bag, the elements in the bag are stored in data[0]
-   //      through data[used-1], and we don't care what's in the
-   //      rest of data.
+   /// Invariant of the Bag struct:
+   ///   1. The number of elements in the bag is in the instance variable 
+   ///      used, which is no more than data.length.
+   ///   2. For an empty bag, we do not care what is stored in any of data;
+   ///      for a non-empty bag, the elements in the bag are stored in data[ 0 ]
+   ///      through data[ used - 1 ], and we don't care what's in the
+   ///      rest of data.
 
    data: Vec<Type>,
    used: usize
@@ -136,20 +137,19 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// Return:
     ///     An unsigned integer value representing the number of items erased from bag
 
-    pub fn erase( &mut self, target: Type ) -> usize
+    pub fn erase( &mut self, target: &Type ) -> usize
     {
-        let mut remove_count = 0;
+        let old_used = self.used;
         let mut index = 0;
 
         // loop will only iterate though the full
-        //  range of 0 to this.used
+        //  range of 0 to this.used, which can vary though the loop
         while index < self.used
         {
-            if self.data[ index ] == target
+            if self.data[ index ] == *target
             {
                self.used -= 1;
                self.data[ index ] = self.data[ self.used ].clone();
-               remove_count += 1;
             }
             else
             {
@@ -157,7 +157,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
             }
         }
 
-        remove_count
+        old_used - self.used
     }
 
     /// Remove one copy of a specified element from this bag.
@@ -170,21 +170,18 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// Return:
     ///     true or false depending on whether target exists in the bag
 
-    pub fn erase_one( &mut self, target: Type ) -> bool
+    pub fn erase_one( &mut self, target: &Type ) -> bool
     {
-        // loop will iterate though the range of 0 to self.used
-        //  or exit as a return if self.data[index] == target
-        for index in 0..self.used
+        match self.data[ ..self.used ].iter().position( | value | value == target )
         {
-            if self.data[ index ] == target
-            {
-               self.used -= 1;
-               self.data[ index ] = self.data[ self.used ].clone();
-               return true;
-            }
+            None    =>      false,
+            Some( index ) =>  
+                {
+                    self.used -= 1;
+                    self.data[ index ] = self.data[ self.used ].clone();
+                    true
+                }
         }
-
-        false
     }
 
     /// Add a new element to this bag doubling capacity if needed
@@ -197,7 +194,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
-    pub fn insert( &mut self, new_item: Type )
+    pub fn insert( &mut self, new_item: &Type )
     {
         if self.used == self.data.len()
         {
@@ -205,8 +202,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
             self.ensure_capacity( new_capacity );
         }
 
-
-        self.data[ self.used ] = new_item;
+        self.data[ self.used ] = ( *new_item ).clone();
         self.used += 1;
     }
 
@@ -230,21 +226,11 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// Return:
     ///     The number of times that target occurs in this bag
 
-    pub fn occurrences( &self, target: Type ) -> usize
+    pub fn occurrences( &self, target: &Type ) -> usize
     {
-        let mut return_count = 0;
-
-        // This loop will only loop though the full range of
-        //  values from 0 to self.used
-        for index in 0..self.used
-        {
-            if target == self.data[ index ]
-            {
-                return_count += 1;
-            }
-        }
-
-        return_count
+        self.data[ ..self.used ].iter()
+                                .filter( | &value | *value == *target )
+                                .count()
     }
 
     /// Reduces the capacity of this bag to current size if there is
@@ -256,14 +242,16 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
 
     pub fn trim_to_size( &mut self )
     {
-        if self.used <= 1
-        {
-            self.data.truncate( 1 );
-        }
-        else
-        {
-            self.data.truncate( self.used );
-        }
+        self.data.truncate(
+            if self.used <= 1
+            {
+                1
+            }
+            else
+            {
+                self.used
+            }
+        )
     }
 }
 
@@ -301,6 +289,12 @@ impl<Type: PartialEq + Clone + Default> Clone for Bag<Type>
     {
         Bag { data: self.data.clone() , used: self.used }
     }
+
+    fn clone_from( &mut self, source: &Self )
+    {
+        self.data = source.data.clone();
+        self.used = source.used;
+    }
 }
 
 impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
@@ -320,22 +314,7 @@ impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
 
     fn eq( &self, other: &Bag<Type> ) -> bool
     {
-        if self.used != other.used
-        {
-            return false;
-        }
-
-        // loop will iterate though the range of 0 to self.used
-        //  or exit as a return if self.data[index] != other.data[index]
-        for index in 0..self.used
-        {
-            if self.data[index] != other.data[index]
-            {
-                return false;
-            }
-        }
-
-        true
+        self.data[ ..self.used ] == other.data[ ..other.used ]
     }
 
     fn ne( &self, other: &Bag<Type> ) -> bool
@@ -359,15 +338,16 @@ impl<Type: PartialEq + Clone + Default> ::std::ops::AddAssign for Bag<Type>
 
     fn add_assign( &mut self, other: Bag<Type> )
     {
-        let old_capacity = self.data.len();
+        let mut old_capacity = self.data.len();
 
-        self.trim_to_size();
+        self.data.truncate( self.used );
         self.data.extend_from_slice( &other.data[ ..other.used ] );
         self.used += other.used;
 
         if self.used < old_capacity
         {
-            self.ensure_capacity( old_capacity );
+            old_capacity -= self.data.len();
+            self.data.extend( vec![ Type::default(); old_capacity ] );
         }
     }
 }
@@ -392,12 +372,10 @@ impl<Type: PartialEq + Clone + Default> ::std::ops::Add for Bag<Type>
 
     fn add( self, other: Bag<Type> ) -> Bag<Type>
     {
-        let mut return_bag = Bag::with_capacity( self.used );
-        return_bag.data.clone_from_slice( &self.data[ ..self.used ] );
-        return_bag.data.extend_from_slice( &other.data[ ..other.used ] );
-        return_bag.used = self.used + other.used;
-
-        return_bag
+        Bag { data: [ &self.data[ ..self.used ]
+                , &other.data[ ..other.used ] ]
+                .concat()
+            , used: self.used + other.used }
     }
 }
 
@@ -408,6 +386,8 @@ impl<Type: PartialEq + Clone + Default + ::std::fmt::Debug> ::std::fmt::Debug fo
     ///     The type in the bag implements the type: Debug
     /// Postcondition:
     ///     The bag is not altered by this method
+    /// # Panics
+    ///     If the iterated write! returns an Err
 
     fn fmt( &self, fmt: &mut ::std::fmt::Formatter ) -> ::std::fmt::Result
     {
@@ -419,12 +399,9 @@ impl<Type: PartialEq + Clone + Default + ::std::fmt::Debug> ::std::fmt::Debug fo
         }
         else
         {
-            // This loop will only loop though the full range of
-            //  values from 0 to self.used - 1
-            for index in 0..( self.used - 1 )
-            {
-                write!( fmt, " {:?},", self.data[ index ] )?;
-            }
+            self.data[ ..( self.used - 1 ) ].iter().for_each(
+                |value| write!( fmt, " {:?},",value ).unwrap() );
+                    // the write returned value is dropped instead of propogated
 
             write!( fmt, " {:?} ] Capacity: {:?}",
                     self.data[ self.used - 1 ],
