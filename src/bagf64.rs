@@ -1,14 +1,10 @@
-// File: bag.rs 
+// File: bagf64.rs 
 
 #![ allow( dead_code ) ]
 
-use std::cmp::PartialEq;
-
-/// An Bag is an unsorted, ordered collection of generic types and in which
+/// An Bag is an unsorted, ordered collection of generic f64s and in which
 /// the same number may appear multiple times. The bag's capacity can grow as
 /// needed and can be reduced.
-///
-/// The type used must have the traits PartialEq, Clone, and Default.
 ///
 /// note:
 ///   Because of the slow linear algorithms of this
@@ -19,9 +15,9 @@ use std::cmp::PartialEq;
 ///    H. Paul Haiduk with credit given to Michael Main
 ///
 /// version:
-///    4.April.2018
+///    5.April.2018
 
-pub struct Bag<Type: PartialEq + Clone + Default>
+pub struct Bag
 {
    /// Invariant of the Bag struct:
    ///   1. The number of elements in the bag is in the instance variable 
@@ -31,11 +27,11 @@ pub struct Bag<Type: PartialEq + Clone + Default>
    ///      through data[ used - 1 ], and we don't care what's in the
    ///      rest of data.
 
-   data: Vec<Type>,
+   data: Vec<f64>,
    used: usize
 }
 
-impl<Type: PartialEq + Clone + Default> Bag<Type>
+impl Bag
 {
     /// Initialize an empty bag
     /// Return:
@@ -45,7 +41,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
 
     pub fn new() -> Self
     {
-        Bag { data: vec![ Type::default(); 1 ], used: 0 }
+        Bag { data: vec![ f64::default(); 1 ], used: 0 }
     }
 
     /// Initialize an empty bag having a capacity of initialCapacity
@@ -68,7 +64,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
         }
         else
         {
-            Bag { data: vec![ Type::default(); initial_capacity ], used: 0 }
+            Bag { data: vec![ f64::default(); initial_capacity ], used: 0 }
         }
     }
 
@@ -82,7 +78,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
-    pub fn from_bag( source: &Bag<Type> ) -> Self
+    pub fn from_bag( source: &Bag ) -> Self
     {
         Bag { data: source.data.clone() , used: source.used }
     }
@@ -112,7 +108,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
             if self.data.len() < new_capacity
             {
                 new_capacity -= self.data.len();
-                self.data.extend( vec![ Type::default(); new_capacity ] );
+                self.data.extend( vec![ f64::default(); new_capacity ] );
             }
         }
     }
@@ -137,7 +133,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// Return:
     ///     An unsigned integer value representing the number of items erased from bag
 
-    pub fn erase( &mut self, target: &Type ) -> usize
+    pub fn erase( &mut self, target: &f64 ) -> usize
     {
         let old_used = self.used;
         let mut index = 0;
@@ -170,7 +166,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// Return:
     ///     true or false depending on whether target exists in the bag
 
-    pub fn erase_one( &mut self, target: &Type ) -> bool
+    pub fn erase_one( &mut self, target: &f64 ) -> bool
     {
         match self.data[ ..self.used ].iter().position( | value | value == target )
         {
@@ -194,7 +190,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
-    pub fn insert( &mut self, new_item: &Type )
+    pub fn insert( &mut self, new_item: &f64 )
     {
         if self.used == self.data.len()
         {
@@ -226,7 +222,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// Return:
     ///     The number of times that target occurs in this bag
 
-    pub fn occurrences( &self, target: &Type ) -> usize
+    pub fn occurrences( &self, target: &f64 ) -> usize
     {
         self.data[ ..self.used ].iter()
                                 .filter( | &value | value == target )
@@ -255,7 +251,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> Default for Bag<Type>
+impl Default for Bag
 {
     /// Initialize an empty bag
     /// Return:
@@ -265,11 +261,11 @@ impl<Type: PartialEq + Clone + Default> Default for Bag<Type>
 
     fn default() -> Self
     {
-        Bag { data: vec![ Type::default(); 1 ], used: 0 }
+        Bag { data: vec![ f64::default(); 1 ], used: 0 }
     }
 }
 
-impl<Type: PartialEq + Clone + Default> Clone for Bag<Type>
+impl Clone for Bag
 {
     /// Generate a copy of this bag.
     /// Postcondition:
@@ -297,7 +293,7 @@ impl<Type: PartialEq + Clone + Default> Clone for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
+impl ::std::cmp::PartialEq for Bag
 {
     /// Compare this DoubleArrayBag to another object for equality of value
     /// Parameter: self
@@ -312,18 +308,18 @@ impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
     ///     the values of all the elements in self are the same and in the
     ///     same position in other
 
-    fn eq( &self, other: &Bag<Type> ) -> bool
+    fn eq( &self, other: &Bag ) -> bool
     {
         self.data[ ..self.used ] == other.data[ ..other.used ]
     }
 
-    fn ne( &self, other: &Bag<Type> ) -> bool
+    fn ne( &self, other: &Bag ) -> bool
     {
         !( self == other )
     }
 }
 
-impl<Type: PartialEq + Clone + Default> ::std::ops::AddAssign for Bag<Type>
+impl ::std::ops::AddAssign for Bag
 {
     /// Add the contents of another bag to this bag.
     /// Parameter: self
@@ -336,7 +332,7 @@ impl<Type: PartialEq + Clone + Default> ::std::ops::AddAssign for Bag<Type>
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
-    fn add_assign( &mut self, other: Bag<Type> )
+    fn add_assign( &mut self, other: Bag )
     {
         let mut old_capacity = self.data.len();
 
@@ -347,12 +343,12 @@ impl<Type: PartialEq + Clone + Default> ::std::ops::AddAssign for Bag<Type>
         if self.used < old_capacity
         {
             old_capacity -= self.data.len();
-            self.data.extend( vec![ Type::default(); old_capacity ] );
+            self.data.extend( vec![ f64::default(); old_capacity ] );
         }
     }
 }
 
-impl<Type: PartialEq + Clone + Default> ::std::ops::Add for Bag<Type>
+impl ::std::ops::Add for Bag
 {
     /// Create a new bag that contains all the elements from two other bags
     /// Parameter: self
@@ -368,9 +364,9 @@ impl<Type: PartialEq + Clone + Default> ::std::ops::Add for Bag<Type>
     /// # Aborts
     ///     OOM: Insufficient memory for allocating a new array
 
-    type Output = Bag<Type>;
+    type Output = Bag;
 
-    fn add( self, other: Bag<Type> ) -> Bag<Type>
+    fn add( self, other: Bag ) -> Bag
     {
         Bag { data: [ &self.data[ ..self.used ]
                 , &other.data[ ..other.used ] ]
@@ -379,11 +375,9 @@ impl<Type: PartialEq + Clone + Default> ::std::ops::Add for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default + ::std::fmt::Debug> ::std::fmt::Debug for Bag<Type>
+impl ::std::fmt::Debug for Bag
 {
     /// This method renders the bag's contents into a human readable form
-    /// Precondition:
-    ///     The type in the bag implements the type: Debug
     /// Postcondition:
     ///     The bag is not altered by this method
     /// # Panics
@@ -407,15 +401,5 @@ impl<Type: PartialEq + Clone + Default + ::std::fmt::Debug> ::std::fmt::Debug fo
                     self.data[ self.used - 1 ],
                     self.data.len() )
         }
-    }
-}
-
-impl<Type: PartialEq + Clone + Default + ::std::hash::Hash> ::std::hash::Hash for Bag<Type>
-{
-    // Used for places that need a hash, like a hashmap
-    fn hash<HashType: ::std::hash::Hasher>( &self, state: &mut HashType )
-    {
-        self.used.hash( state );
-        self.data[ ..self.used ].hash( state );
     }
 }
