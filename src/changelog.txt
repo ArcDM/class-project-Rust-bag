@@ -21,12 +21,20 @@ Implemented:
 
     Added Clone::clone_from() method for completeness
 
+    
+    5.4.2018
+    Restructured bagexam.rs to fit more of a testing implementation
+        It is now five tests with no print statements.
+        I added a few more comparisons into it.
+
+    Made a f64 bag
+        Very simple change of a few parameters.
+
 In_Combat:
     <None>
 
 Planned:
-    Restructure of bagexam.rs to fit more of a testing implementation
-    Make a f64 bag
+    Explicit documentation
 
 Abandonded:
     Assess functions in bag for a different implementation
