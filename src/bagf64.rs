@@ -2,9 +2,9 @@
 
 #![ allow( dead_code ) ]
 
-/// An Bag is an unsorted, ordered collection of generic f64s and in which
-/// the same number may appear multiple times. The bag's capacity can grow as
-/// needed and can be reduced.
+/// An Bag as an unsorted, ordered collection of f64s and in which
+/// the same number may appear multiple times. The bag's capacity can
+/// grow as needed and can be reduced.
 ///
 /// note:
 ///   Because of the slow linear algorithms of this
@@ -15,13 +15,12 @@
 ///    H. Paul Haiduk with credit given to Michael Main
 ///
 /// version:
-///    5.April.2018
+///    7.April.2018
 
 pub struct Bag
 {
    /// Invariant of the Bag struct:
-   ///   1. The number of elements in the bag is in the instance variable 
-   ///      used, which is no more than data.length.
+   ///   1. The number of elements in the bag is in the instance variable used.
    ///   2. For an empty bag, we do not care what is stored in any of data;
    ///      for a non-empty bag, the elements in the bag are stored in data[ 0 ]
    ///      through data[ used - 1 ], and we don't care what's in the
@@ -33,28 +32,28 @@ pub struct Bag
 
 impl Bag
 {
-    /// Initialize an empty bag
+    /// Initialize an empty bag.
     /// Return:
-    ///     A bag that is empty and has a capacity of 0
+    ///     A bag that is empty and has a capacity of 1.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     pub fn new() -> Self
     {
         Bag { data: vec![ f64::default(); 1 ], used: 0 }
     }
 
-    /// Initialize an empty bag having a capacity of initialCapacity
+    /// Initialize an empty bag having a capacity of initialCapacity.
     /// Parameter: initial_capacity
-    ///     An unsigned integer greater than 0
+    ///     An unsigned integer greater than 0.
     /// Precondition:
-    ///     initial_capacity must be greater than 0
+    ///     initial_capacity must be greater than 0.
     /// Return:
-    ///     A bag that is empty and has a capacity of initial_capacity
+    ///     A bag that is empty and has a capacity of initial_capacity.
     /// # Panics
-    ///     InitialCapacity given is not greater than 0
+    ///     InitialCapacity given is not greater than 0.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     pub fn with_capacity( initial_capacity: usize ) -> Self
     {
@@ -68,39 +67,42 @@ impl Bag
         }
     }
 
-    /// Initialize a new bag as an exact copy of source
+    /// Initialize a new bag as an exact copy of source.
+    /// Depreciated with the addition of Clone()
     /// Parameter: source
-    ///     A reference to a bag that is to be copied
+    ///     A reference to a bag that is to be copied.
     /// Postcondition:
     ///     This bag is a copy of source and has a capacity of
     ///     of number of elements in source. Subsequent changes to
     ///     the copy will not affect the original, nor vice versa.
+    /// Return:
+    ///     A bag that is equivalent to the bag supplied.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     pub fn from_bag( source: &Bag ) -> Self
     {
         Bag { data: source.data.clone() , used: source.used }
     }
     
-    /// Potentially increase capacity of this bag
+    /// Potentially increase capacity of this bag.
     /// Parameter: new_capacity
-    ///     An unsigned integer greater than 0
+    ///     An unsigned integer greater than 0.
     /// Precondition:
-    ///     new_capacity must be greater than 0
+    ///     new_capacity must be greater than 0.
     /// Postcondition:
     ///     The bag's capacity is at least newCapacity.  If the capacity
     ///     was already at or greater than newCapacity, then the capacity
     ///     is left unchanged.
     /// # Panics
-    ///     InitialCapacity given is not greater than 0
+    ///     InitialCapacity given is not greater than 0.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     pub fn ensure_capacity( &mut self, mut new_capacity: usize )
     {
         if new_capacity <= 0
-        { // data.len() will always be greater than zero, why is this needed?
+        {
             panic!( "new_capacity < 1" );
         }
         else
@@ -113,25 +115,26 @@ impl Bag
         }
     }
 
-    /// Returns the current capacity of the bag
+    /// Return the current capacity of the bag.
     /// Postcondition:
-    ///     This method does not alter state of the bag
+    ///     This method does not alter state of the bag.
     /// Return:
-    ///     An unsigned integer that represents total capacity of this bag
+    ///     An unsigned integer that represents total capacity of this bag.
 
     pub fn get_capacity( &self ) -> usize
     {
         self.data.len()
     }
 
-    /// Erases all copies of a specified element from this bag if target exists in bag.
+    /// Erase all copies of a specified element from this bag if target exists in bag.
     /// Parameter: target
-    ///     the element(s) to remove from the bag
+    ///     the element(s) to remove from the bag.
     /// Postcondition:
     ///     If target was found in the bag, then all copies of
-    ///     target have been removed and the method returns number of items removed. 
+    ///     target have been removed and the method returns number of items removed.
+    ///     Used will change if one is found, but the capacity will not.
     /// Return:
-    ///     An unsigned integer value representing the number of items erased from bag
+    ///     An unsigned integer value representing the number of items erased from bag.
 
     pub fn erase( &mut self, target: &f64 ) -> usize
     {
@@ -158,13 +161,14 @@ impl Bag
 
     /// Remove one copy of a specified element from this bag.
     /// Parameter: target
-    ///     the element to remove from the bag
+    ///     The element to remove from the bag.
     /// Postcondition:
     ///     If target was found in the bag, then one copy of
     ///     target has been removed and the method returns true. 
-    ///     Otherwise the bag remains unchanged and the method returns false. 
+    ///     Otherwise the bag remains unchanged and the method returns false.
+    ///     Used will change if one is found, but the capacity will not.
     /// Return:
-    ///     true or false depending on whether target exists in the bag
+    ///     True or false depending on whether target exists in the bag.
 
     pub fn erase_one( &mut self, target: &f64 ) -> bool
     {
@@ -180,15 +184,16 @@ impl Bag
         }
     }
 
-    /// Add a new element to this bag doubling capacity if needed
+    /// Add a new element to this bag doubling capacity if needed.
     /// Parameter: new_item
-    ///     The new element that is being inserted
+    ///     The new element that is being inserted.
     /// Postcondition:
     ///     A new copy of the element has been added to this bag.
+    ///     Used will increase by one, the capacity only change if needed.
     /// # Panics
-    ///     "self.data.len() * 2" causes an unsigned integer overflow
+    ///     If "self.data.len() * 2" causes an unsigned integer overflow.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     pub fn insert( &mut self, new_item: &f64 )
     {
@@ -204,9 +209,9 @@ impl Bag
 
     /// Determine the number of elements in this bag.
     /// Postcondition:
-    ///     This method does not alter state of the bag
+    ///     This method does not alter state of the bag.
     /// Return:
-    ///     The number of elements in this bag
+    ///     The number of elements in this bag.
 
     pub fn size( &self ) -> usize
     {
@@ -216,11 +221,11 @@ impl Bag
     /// Accessor method to count the number of occurrences of a
     /// particular element in this bag.
     /// Parameter: target
-    ///     The element for which number of occurrences will be counted 
+    ///     The element for which number of occurrences will be counted.
     /// Postcondition:
-    ///     This method does not alter state of the bag
+    ///     This method does not alter state of the bag.
     /// Return:
-    ///     The number of times that target occurs in this bag
+    ///     The number of times that target occurs in this bag.
 
     pub fn occurrences( &self, target: &f64 ) -> usize
     {
@@ -230,11 +235,11 @@ impl Bag
     }
 
     /// Reduces the capacity of this bag to current size if there is
-    /// excess capacity
+    /// excess capacity.
     /// Postcondition:
-    ///   capacity of this bag is reduced to the current number
+    ///   Capacity of this bag is reduced to the current number
     ///   of items in bag or left unchanged if capacity equals to
-    ///   number of items in bag but must be at least 1
+    ///   number of items in bag but must be at least one.
 
     pub fn trim_to_size( &mut self )
     {
@@ -247,17 +252,17 @@ impl Bag
             {
                 self.used
             }
-        )
+        );
     }
 }
 
 impl Default for Bag
 {
-    /// Initialize an empty bag
+    /// Initialize an empty bag.
     /// Return:
-    ///     A bag that is empty and has a capacity of 0
+    ///     A bag that is empty and has a capacity of 1.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     fn default() -> Self
     {
@@ -272,19 +277,29 @@ impl Clone for Bag
     ///     The clone is not the same object as the sourse.
     ///     The clone is the same type as the sourse.
     ///     The clone will equal the sourse as long as both
-    ///     bags are unaltered
+    ///     bags are unaltered.
     /// Return:
     ///     A new bag initialized as bag with all the elements in
     ///     source and with capacity to equal that number of elements.
     ///     Subsequent changes to the copy will not affect the original,
     ///     nor vice versa.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     fn clone( &self ) -> Self
     {
         Bag { data: self.data.clone() , used: self.used }
     }
+
+    /// Make a copy from a source.
+    /// Parameter: source
+    ///     A reference to a bag that is to be copied.
+    /// Postcondition:
+    ///     This bag is now a copy of source and has a capacity of
+    ///     of number of elements in source. Subsequent changes to
+    ///     the copy will not affect the original, nor vice versa.
+    /// # Aborts
+    ///     OOM: Insufficient memory for allocating a new array.
 
     fn clone_from( &mut self, source: &Self )
     {
@@ -295,23 +310,34 @@ impl Clone for Bag
 
 impl ::std::cmp::PartialEq for Bag
 {
-    /// Compare this DoubleArrayBag to another object for equality of value
+    /// Compare this DoubleArrayBag to another object for equality of value.
     /// Parameter: self
-    ///     The first of two bags
+    ///     The first of two bags.
     /// Parameter: other
-    ///     The second of two bags
-    /// post:
+    ///     The second of two bags.
+    /// Postcondition:
     ///     x == x is true
     ///     if x == y, then y == x
     /// Return:
-    ///     true if number of elements in this and other are the same AND if
+    ///     True if number of elements in self and other are the same AND if
     ///     the values of all the elements in self are the same and in the
-    ///     same position in other
+    ///     same position in other.
 
     fn eq( &self, other: &Bag ) -> bool
     {
         self.data[ ..self.used ] == other.data[ ..other.used ]
     }
+
+    /// Compare this DoubleArrayBag to another object for inequality of value.
+    /// Parameter: self
+    ///     The first of two bags.
+    /// Parameter: other
+    ///     The second of two bags.
+    /// Postcondition:
+    ///     x == x is true
+    ///     if x != y, then y != x
+    /// Return:
+    ///     False if self == other.
 
     fn ne( &self, other: &Bag ) -> bool
     {
@@ -323,14 +349,17 @@ impl ::std::ops::AddAssign for Bag
 {
     /// Add the contents of another bag to this bag.
     /// Parameter: self
-    ///     The bag that will be added to
+    ///     The bag that will be added to.
     /// Parameter: other
-    ///     A bag whose contents will be added to self
+    ///     A bag whose contents will be added to self.
     /// Postcondition:
-    ///     The elements from addend have been added to self
-    ///     Other will be unmodified
+    ///     The elements from other have been added to self.
+    ///     Other will be unmodified.
+    /// # Panics
+    ///     If "self.used + other.used" would cause an
+    ///     unsigned integer overflow.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     fn add_assign( &mut self, other: Bag )
     {
@@ -350,19 +379,20 @@ impl ::std::ops::AddAssign for Bag
 
 impl ::std::ops::Add for Bag
 {
-    /// Create a new bag that contains all the elements from two other bags
+    /// Create a new bag that contains all the elements from two other bags.
     /// Parameter: self
-    ///     The first of two bags
+    ///     The first of two bags.
     /// Parameter: other
-    ///     The second of two bags
+    ///     The second of two bags.
     /// Postcondition:
-    ///     The bag referenced by b1 and bag reference by b2 are not altered
+    ///     The bag referenced by b1 and bag reference by b2 are not altered.
     /// Return:
-    ///     A bag that is the union of b1 and b2
+    ///     A new bag that is the union of b1 and b2.
     /// # Panics
-    ///     self.used + other.used causes an unsigned integer overflow
+    ///     If "self.used + other.used" would cause an
+    ///     unsigned integer overflow.
     /// # Aborts
-    ///     OOM: Insufficient memory for allocating a new array
+    ///     OOM: Insufficient memory for allocating a new array.
 
     type Output = Bag;
 
@@ -377,11 +407,13 @@ impl ::std::ops::Add for Bag
 
 impl ::std::fmt::Debug for Bag
 {
-    /// This method renders the bag's contents into a human readable form
+    /// Renders the bag's contents into a human readable form.
+    /// Precondition:
+    ///     The type in the bag implements the trait: Debug.
     /// Postcondition:
-    ///     The bag is not altered by this method
+    ///     The bag is not altered by this method.
     /// # Panics
-    ///     If the iterated write! returns an Err
+    ///     If the iterated write! returns an Err.
 
     fn fmt( &self, fmt: &mut ::std::fmt::Formatter ) -> ::std::fmt::Result
     {
