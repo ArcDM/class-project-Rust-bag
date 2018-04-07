@@ -5,6 +5,7 @@
 extern crate rand;
 
 use bag::Bag;
+//use bagVec::Bag;
 
 #[ test ]
 ///   Performs some basic tests of insert and the constant member functions. 

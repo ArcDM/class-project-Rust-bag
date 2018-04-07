@@ -9,5 +9,7 @@ mod bagf64;
 #[cfg(test)]
 mod bagexamf64;
 
-fn main() {
-}
+#[ allow( non_snake_case ) ]
+mod bagVec;
+
+fn main() {}
