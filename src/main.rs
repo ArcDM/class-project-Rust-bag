@@ -1,7 +1,7 @@
-mod bag;
-mod bagf64;
+pub mod bag;
+pub mod bagf64;
 
 #[ allow( non_snake_case ) ]
-mod bagVec;
+pub mod bagVec;
 
 fn main() {}
