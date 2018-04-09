@@ -10,6 +10,6 @@ mod bagf64;
 mod bagexamf64;
 
 #[ allow( non_snake_case ) ]
-mod bagVec;
+pub mod bagVec;
 
 fn main() {}
