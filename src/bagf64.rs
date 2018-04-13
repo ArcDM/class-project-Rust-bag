@@ -76,18 +76,18 @@ impl Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &1.0 );
-    /// bag.insert( &2.0 );
-    /// bag.insert( &2.0 );
-    /// bag.insert( &3.0 );
-    /// bag.insert( &3.0 );
-    /// bag.insert( &3.0 );
+    /// bag.insert( 1.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 3.0 );
+    /// bag.insert( 3.0 );
+    /// bag.insert( 3.0 );
     ///
-    /// assert_eq!( bag.erase( &2.0 ), 2 );
+    /// assert_eq!( bag.erase( 2.0 ), 2 );
     /// assert_eq!( bag.size(), 4 );
     /// ```
 
-    pub fn erase( &mut self, target: &f64 ) -> usize
+    pub fn erase( &mut self, target: f64 ) -> usize
     {
         let old_used = self.used;
         let mut index = 0;
@@ -96,7 +96,7 @@ impl Bag
         //  range of 0 to this.used, which can vary though the loop
         while index < self.used
         {
-            if self.data[ index ] == *target
+            if self.data[ index ] == target
             {
                self.used -= 1;
                self.data[ index ] = self.data[ self.used ].clone();
@@ -129,20 +129,20 @@ impl Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &1.0 );
-    /// bag.insert( &2.0 );
-    /// bag.insert( &3.0 );
+    /// bag.insert( 1.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 3.0 );
     ///
-    /// assert!( bag.erase( &2.0 ) );
+    /// assert!( bag.erase( 2.0 ) );
     /// assert_eq!( bag.size(), 2 );
     /// ```
 
-    pub fn erase_one( &mut self, target: &f64 ) -> bool
+    pub fn erase_one( &mut self, target: f64 ) -> bool
     {
-        match self.data[ ..self.used ].iter().position( | value | value == target )
+        match self.data[ ..self.used ].iter().position( | value | *value == target )
         {
             None    =>      false,
-            Some( index ) =>  
+            Some( index ) =>
                 {
                     self.used -= 1;
                     self.data[ index ] = self.data[ self.used ].clone();
@@ -172,16 +172,16 @@ impl Bag
     /// ```
     /// let mut bag = Bag::new();
     ///
-    /// bag.insert( &2.0 );
-    /// bag.insert( &4.0 );
-    /// bag.insert( &6.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 4.0 );
+    /// bag.insert( 6.0 );
     /// assert_eq!( bag.size(), 3 );
     ///
-    /// bag.insert( &3.0 );
+    /// bag.insert( 3.0 );
     /// assert_eq!( bag.size(), 4 );
     /// ```
 
-    pub fn insert( &mut self, new_item: &f64 )
+    pub fn insert( &mut self, new_item: f64 )
     {
         if self.used == self.data.len()
         {
@@ -189,7 +189,7 @@ impl Bag
             self.data.extend( vec![ f64::default(); extra_capacity ] );
         }
 
-        self.data[ self.used ] = ( *new_item ).clone();
+        self.data[ self.used ] = new_item;
         self.used += 1;
     }  
 
@@ -209,20 +209,20 @@ impl Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &2.0 );
-    /// bag.insert( &4.0 );
-    /// bag.insert( &4.0 );
-    /// bag.insert( &6.0 );
-    /// bag.insert( &6.0 );
-    /// bag.insert( &6.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 4.0 );
+    /// bag.insert( 4.0 );
+    /// bag.insert( 6.0 );
+    /// bag.insert( 6.0 );
+    /// bag.insert( 6.0 );
     ///
-    /// assert_eq!( bag.occurrences( &4.0 ), 2 );
+    /// assert_eq!( bag.occurrences( 4.0 ), 2 );
     /// ```
 
-    pub fn occurrences( &self, target: &f64 ) -> usize
+    pub fn occurrences( &self, target: f64 ) -> usize
     {
         self.data[ ..self.used ].iter()
-                                .filter( | &value | value == target )
+                                .filter( | &value | *value == target )
                                 .count()
     }
 }
@@ -241,9 +241,9 @@ impl len_trait::len::Len for Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &2.0 );
-    /// bag.insert( &4.0 );
-    /// bag.insert( &6.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 4.0 );
+    /// bag.insert( 6.0 );
     ///
     /// assert_eq!( bag.len(), 3 );
     /// ```
@@ -270,7 +270,7 @@ impl len_trait::len::Empty for Bag
     /// let mut bag = Bag::new();
     /// assert!( bag.is_empty() );
     ///
-    /// bag.insert( &1.0 );
+    /// bag.insert( 1.0 );
     /// assert!( !bag.is_empty() );
     /// ```
 
@@ -291,9 +291,9 @@ impl len_trait::len::Clear for Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &1.0 );
-    /// bag.insert( &2.0 );
-    /// bag.insert( &3.0 );
+    /// bag.insert( 1.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 3.0 );
     /// assert!( !bag.is_empty() );
     ///
     /// bag.clear();
@@ -363,7 +363,7 @@ impl len_trait::capacity::WithCapacity for Bag
     /// }
     ///
     /// // ...but this will cause the capacity to increase
-    /// bag.insert( &11.0 );
+    /// bag.insert( 11.0 );
     /// ```
 
     fn with_capacity( initial_capacity: usize ) -> Self
@@ -442,9 +442,9 @@ impl len_trait::capacity::CapacityMut for Bag
     ///
     /// ```
     /// let mut bag = Bag::with_capacity( 10 );
-    /// bag.insert( &1.0 );
-    /// bag.insert( &2.0 );
-    /// bag.insert( &3.0 );
+    /// bag.insert( 1.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 3.0 );
     /// assert_eq!( bag.capacity(), 10 );
     ///
     /// bag.shrink_to_fit();
