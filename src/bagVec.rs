@@ -1,8 +1,15 @@
-// File: bagf64.rs 
+// File: bag.rs 
 
-//! A Bag as an unsorted, ordered collection of f64s and in which
-//! the same number may appear multiple times. The bag's capacity can
+//! A Bag as an unsorted, ordered collection of generic types in which
+//! the same item may appear multiple times. The bag's capacity can
 //! grow as needed and can be reduced.
+//!
+//! This varient of the bag take advantage of the methods that the
+//! Vector structure provides. Unfortunately using the vector's variable
+//! for capacity give its methods complete control over its changes,
+//! making for unforeseeable results when using its capacity.
+//!
+//! The type used must have the traits `PartialEq` and `Clone`.
 //!
 //! # Note
 //! Because of the slow linear algorithms of this
@@ -18,25 +25,25 @@
 #![ allow( dead_code ) ]
 
 pub extern crate len_trait;
+use std::cmp::PartialEq;
 
 /// A container for inserting and removing given values.
 ///
 /// # Invariant of the Bag struct:
 ///
-/// 1. The number of elements in the bag is in the instance variable used.
+/// 1. The number of elements in the bag is no more than data.len().
 ///
 /// 2. For an empty bag, we do not care what is stored in any of data;
 /// for a non-empty bag, the elements in the bag are stored in `data[ 0 ]`
-/// through `data[ used - 1 ]`, and we don't care what's in the
+/// through `data[ data.len() - 1 ]`, and we don't care what's in the
 /// rest of data.
 
-pub struct Bag
+pub struct Bag<Type: PartialEq + Clone>
 {
-   data: Vec<f64>,
-   used: usize
+   data: Vec<Type>
 }
 
-impl Bag
+impl<Type: PartialEq + Clone> Bag<Type>
 {
     /// Initialize an empty bag.
     ///
@@ -55,7 +62,7 @@ impl Bag
 
     pub fn new() -> Self
     {
-        Bag { data: vec![ f64::default(); 1 ], used: 0 }
+        Bag { data: Vec::with_capacity( 1 ) }
     }
 
     /// Erase all copies of a specified element from this bag if target exists in bag.
@@ -67,7 +74,7 @@ impl Bag
     /// If `target` was found in the bag, then all copies of
     /// `target` have been removed and the method returns number of items removed.
     ///
-    /// Used will change if one is found, but the capacity will not.
+    /// The length will change if one is found, but the capacity will not.
     ///
     /// # Return
     /// An unsigned integer value representing the number of items erased from bag.
@@ -76,30 +83,29 @@ impl Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( 1.0 );
-    /// bag.insert( 2.0 );
-    /// bag.insert( 2.0 );
-    /// bag.insert( 3.0 );
-    /// bag.insert( 3.0 );
-    /// bag.insert( 3.0 );
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
+    /// bag.insert( 3 );
+    /// bag.insert( 3 );
     ///
-    /// assert_eq!( bag.erase( 2.0 ), 2 );
-    /// assert_eq!( bag.size(), 4 );
+    /// assert_eq!( bag.erase( 2 ), 2 );
+    /// assert_eq!( bag.len(), 4 );
     /// ```
 
-    pub fn erase( &mut self, target: f64 ) -> usize
+    pub fn erase( &mut self, target: Type ) -> usize
     {
-        let old_used = self.used;
+        let old_len = self.data.len();
         let mut index = 0;
 
         // loop will only iterate though the full
-        //  range of 0 to this.used, which can vary though the loop
-        while index < self.used
+        //  range of 0 to this.len(), which can vary though the loop
+        while index < self.data.len()
         {
             if self.data[ index ] == target
             {
-               self.used -= 1;
-               self.data[ index ] = self.data[ self.used ].clone();
+               self.data.swap_remove( index );
             }
             else
             {
@@ -107,7 +113,7 @@ impl Bag
             }
         }
 
-        old_used - self.used
+        old_len - self.data.len()
     }
 
     /// Remove one copy of a specified element from this bag.
@@ -120,7 +126,7 @@ impl Bag
     /// `target` has been removed and the method returns true. 
     /// Otherwise the bag remains unchanged and the method returns false.
     ///
-    /// Used will change if one is found, but the capacity will not.
+    /// The length will change if one is found, but the capacity will not.
     ///
     /// # Return
     /// True or false depending on whether `target` exists in the bag.
@@ -129,23 +135,22 @@ impl Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( 1.0 );
-    /// bag.insert( 2.0 );
-    /// bag.insert( 3.0 );
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
     ///
-    /// assert!( bag.erase( 2.0 ) );
-    /// assert_eq!( bag.size(), 2 );
+    /// assert!( bag.erase( 2 ) );
+    /// assert_eq!( bag.len(), 2 );
     /// ```
 
-    pub fn erase_one( &mut self, target: f64 ) -> bool
+    pub fn erase_one( &mut self, target: Type ) -> bool
     {
-        match self.data[ ..self.used ].iter().position( | value | *value == target )
+        match self.data.iter().position( | value | *value == target )
         {
             None    =>      false,
-            Some( index ) =>
+            Some( index ) =>  
                 {
-                    self.used -= 1;
-                    self.data[ index ] = self.data[ self.used ].clone();
+                    self.data.swap_remove( index );
                     true
                 }
         }
@@ -159,10 +164,14 @@ impl Bag
     /// # Postcondition
     /// A new copy of the element has been added to this bag.
     ///
-    /// Used will increase by one, the capacity only change if needed.
+    /// The length will increase by one, the capacity only change if needed.
+    ///
+    /// # Caution
+    ///   Because of how reserve_exact() works, this method does
+    ///   not always work as intended.
     ///
     /// # Panics
-    /// If `self.data.len() * 2` causes an unsigned integer overflow.
+    /// If `self.data.capacity() * 2` causes an unsigned integer overflow.
     ///
     /// # Aborts
     /// OOM: Insufficient memory for allocating a new array.
@@ -172,26 +181,25 @@ impl Bag
     /// ```
     /// let mut bag = Bag::new();
     ///
-    /// bag.insert( 2.0 );
-    /// bag.insert( 4.0 );
-    /// bag.insert( 6.0 );
-    /// assert_eq!( bag.size(), 3 );
+    /// bag.insert( 2 );
+    /// bag.insert( 4 );
+    /// bag.insert( 6 );
+    /// assert_eq!( bag.len(), 3 );
     ///
-    /// bag.insert( 3.0 );
-    /// assert_eq!( bag.size(), 4 );
+    /// bag.insert( 3 );
+    /// assert_eq!( bag.len(), 4 );
     /// ```
 
-    pub fn insert( &mut self, new_item: f64 )
+    pub fn insert( &mut self, new_item: Type )
     {
-        if self.used == self.data.len()
+        if self.data.len() == self.data.capacity()
         {
-            let extra_capacity = self.data.len();
-            self.data.extend( vec![ f64::default(); extra_capacity ] );
+            let extra_capacity = self.data.capacity();
+            self.data.reserve_exact( extra_capacity );
         }
 
-        self.data[ self.used ] = new_item;
-        self.used += 1;
-    }  
+        self.data.push( new_item );
+    } 
 
     /// Accessor method to count the number of occurrences of a
     /// particular element in this bag.
@@ -209,25 +217,25 @@ impl Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( 2.0 );
-    /// bag.insert( 4.0 );
-    /// bag.insert( 4.0 );
-    /// bag.insert( 6.0 );
-    /// bag.insert( 6.0 );
-    /// bag.insert( 6.0 );
+    /// bag.insert( 2 );
+    /// bag.insert( 4 );
+    /// bag.insert( 4 );
+    /// bag.insert( 6 );
+    /// bag.insert( 6 );
+    /// bag.insert( 6 );
     ///
-    /// assert_eq!( bag.occurrences( 4.0 ), 2 );
+    /// assert_eq!( bag.occurrences( 4 ), 2 );
     /// ```
 
-    pub fn occurrences( &self, target: f64 ) -> usize
+    pub fn occurrences( &self, target: Type ) -> usize
     {
-        self.data[ ..self.used ].iter()
-                                .filter( | &value | *value == target )
-                                .count()
+        self.data.iter()
+                .filter( | &value | *value == target )
+                .count()
     }
 }
 
-impl len_trait::len::Len for Bag
+impl<Type: PartialEq + Clone> len_trait::len::Len for Bag<Type>
 {
     /// Determine the number of elements in this bag.
     ///
@@ -241,20 +249,20 @@ impl len_trait::len::Len for Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( 2.0 );
-    /// bag.insert( 4.0 );
-    /// bag.insert( 6.0 );
+    /// bag.insert( 2 );
+    /// bag.insert( 4 );
+    /// bag.insert( 6 );
     ///
     /// assert_eq!( bag.len(), 3 );
     /// ```
 
     fn len( &self ) -> usize
     {
-        self.used
+        self.data.len()
     }
 }
 
-impl len_trait::len::Empty for Bag
+impl<Type: PartialEq + Clone> len_trait::len::Empty for Bag<Type>
 {
     /// Determine if the bag is empty.
     ///
@@ -270,17 +278,17 @@ impl len_trait::len::Empty for Bag
     /// let mut bag = Bag::new();
     /// assert!( bag.is_empty() );
     ///
-    /// bag.insert( 1.0 );
+    /// bag.insert( 1 );
     /// assert!( !bag.is_empty() );
     /// ```
 
     fn is_empty( &self ) -> bool
     {
-        self.used < 1
+        self.data.is_empty()
     }
 }
 
-impl len_trait::len::Clear for Bag
+impl<Type: PartialEq + Clone> len_trait::len::Clear for Bag<Type>
 {
     /// Empty the bag.
     ///
@@ -291,22 +299,21 @@ impl len_trait::len::Clear for Bag
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( 1.0 );
-    /// bag.insert( 2.0 );
-    /// bag.insert( 3.0 );
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
     /// assert!( !bag.is_empty() );
     ///
     /// bag.clear();
     /// assert!( bag.is_empty() );
-    /// ```
 
     fn clear(&mut self)
     {
-        self.used = 0;
+        self.data.clear();
     }
 }
 
-impl len_trait::capacity::Capacity for Bag
+impl<Type: PartialEq + Clone> len_trait::capacity::Capacity for Bag<Type>
 {
     /// Return the current capacity of the bag.
     ///
@@ -319,17 +326,17 @@ impl len_trait::capacity::Capacity for Bag
     /// # Examples
     ///
     /// ```
-    /// let mut bag = Bag::WithCapacity( 10 );
+    /// let mut bag = Bag::with_capacity( 10 );
     /// assert_eq!( bag.capacity(), 10 );
     /// ```
 
     fn capacity( &self ) -> usize
     {
-        self.data.len()
+        self.data.capacity()
     }
 }
 
-impl len_trait::capacity::WithCapacity for Bag
+impl<Type: PartialEq + Clone> len_trait::capacity::WithCapacity for Bag<Type>
 {
     /// Initialize an empty bag having a capacity of `initial_capacity`.
     ///
@@ -351,19 +358,19 @@ impl len_trait::capacity::WithCapacity for Bag
     /// # Examples
     ///
     /// ```
-    /// let mut bag = Bag::WithCapacity( 10 );
+    /// let mut bag = Bag::with_capacity( 10 );
     ///
     /// // The bag contains no items, even though it has capacity for more
     /// assert_eq!( bag.len(), 0 );
     ///
     /// // These are all done without increasing capacity...
-    /// for i in 0.0..10.0
+    /// for i in 0..10
     /// {
     ///     bag.push( i );
     /// }
     ///
     /// // ...but this will cause the capacity to increase
-    /// bag.insert( 11.0 );
+    /// bag.insert( 11 );
     /// ```
 
     fn with_capacity( initial_capacity: usize ) -> Self
@@ -374,12 +381,12 @@ impl len_trait::capacity::WithCapacity for Bag
         }
         else
         {
-            Bag { data: vec![ f64::default(); initial_capacity ], used: 0 }
+            Bag { data: Vec::with_capacity( initial_capacity ) }
         }
     }
 }
 
-impl len_trait::capacity::CapacityMut for Bag
+impl<Type: PartialEq + Clone> len_trait::capacity::CapacityMut for Bag<Type>
 {
     /// Potentially increase capacity of this bag.
     ///
@@ -387,7 +394,7 @@ impl len_trait::capacity::CapacityMut for Bag
     /// An unsigned integer greater than 0.
     ///
     /// # Precondition
-    /// `new_capacity` must be greater than 0.
+    /// new_capacity must be greater than 0.
     ///
     /// # Postcondition
     /// The bag's capacity is at least `new_capacity`.  If the capacity
@@ -398,6 +405,10 @@ impl len_trait::capacity::CapacityMut for Bag
     /// Unlike the expected reserve trait that takes an argument
     /// of additional capacity, this implementation takes a total
     /// new capacity as the argument.
+    ///
+    /// # Caution
+    /// Because of how reserve_exact() works, this method does
+    /// not always work as intended.
     ///
     /// # Panics
     /// `new_capacity` given is not greater than 0.
@@ -422,10 +433,10 @@ impl len_trait::capacity::CapacityMut for Bag
         }
         else
         {
-            if self.data.len() < new_capacity
+            if self.data.capacity() < new_capacity
             {
-                new_capacity -= self.data.len();
-                self.data.extend( vec![ f64::default(); new_capacity ] );
+                new_capacity -= self.data.capacity();
+                self.data.reserve_exact( new_capacity );
             }
         }
     }
@@ -438,13 +449,17 @@ impl len_trait::capacity::CapacityMut for Bag
     /// of items in bag or left unchanged if capacity equals to
     /// number of items in bag but must be at least one.
     ///
+    /// # Caution
+    /// Because of how shrink_to_fit() works, this method does
+    /// not always work as intended.
+    ///
     /// # Examples
     ///
     /// ```
     /// let mut bag = Bag::with_capacity( 10 );
-    /// bag.insert( 1.0 );
-    /// bag.insert( 2.0 );
-    /// bag.insert( 3.0 );
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
     /// assert_eq!( bag.capacity(), 10 );
     ///
     /// bag.shrink_to_fit();
@@ -453,20 +468,16 @@ impl len_trait::capacity::CapacityMut for Bag
 
     fn shrink_to_fit( &mut self )
     {
-        self.data.truncate(
-            if self.used <= 1
-            {
-                1
-            }
-            else
-            {
-                self.used
-            }
-        );
+        self.data.shrink_to_fit();
+
+        if self.data.len() <= 1
+        {
+            self.data.reserve_exact( 1 );
+        }
     }
 }
 
-impl Default for Bag
+impl<Type: PartialEq + Clone> Default for Bag<Type>
 {
     /// Initialize an empty bag.
     ///
@@ -478,11 +489,11 @@ impl Default for Bag
 
     fn default() -> Self
     {
-        Bag { data: vec![ f64::default(); 1 ], used: 0 }
+        Bag { data: Vec::with_capacity( 1 ) }
     }
 }
 
-impl Clone for Bag
+impl<Type: PartialEq + Clone> Clone for Bag<Type>
 {
     /// Generate a copy of this bag.
     ///
@@ -506,7 +517,7 @@ impl Clone for Bag
 
     fn clone( &self ) -> Self
     {
-        Bag { data: self.data.clone() , used: self.used }
+        Bag { data: self.data.clone() }
     }
 
     /// Make a copy from a source.
@@ -525,11 +536,10 @@ impl Clone for Bag
     fn clone_from( &mut self, source: &Self )
     {
         self.data = source.data.clone();
-        self.used = source.used;
     }
 }
 
-impl ::std::cmp::PartialEq for Bag
+impl<Type: PartialEq + Clone> PartialEq for Bag<Type>
 {
     /// Compare this bag to another for equality of value.
     ///
@@ -546,9 +556,9 @@ impl ::std::cmp::PartialEq for Bag
     /// the values of all the elements in `self` are the same and in the
     /// same position in `other`.
 
-    fn eq( &self, other: &Bag ) -> bool
+    fn eq( &self, other: &Bag<Type> ) -> bool
     {
-        self.data[ ..self.used ] == other.data[ ..other.used ]
+        self.data == other.data
     }
 
     /// Compare this bag to another object for inequality of value.
@@ -564,13 +574,13 @@ impl ::std::cmp::PartialEq for Bag
     /// # Return
     /// False if `self == other`.
 
-    fn ne( &self, other: &Bag ) -> bool
+    fn ne( &self, other: &Bag<Type> ) -> bool
     {
         !( self == other )
     }
 }
 
-impl ::std::ops::AddAssign for Bag
+impl<Type: PartialEq + Clone> ::std::ops::AddAssign for Bag<Type>
 {
     /// Add the contents of another bag to this bag.
     ///
@@ -582,32 +592,33 @@ impl ::std::ops::AddAssign for Bag
     ///
     /// `other` will be unmodified.
     ///
+    /// # Caution
+    ///   Because of how reserve_exact() works, this method does
+    ///   not always work as intended.
+    ///
     /// # Panics
-    /// If `self.used + other.used` would cause an
+    /// If `self.data.len() + other.data.len()` would cause an
     /// unsigned integer overflow.
     ///
     /// # Aborts
     /// OOM: Insufficient memory for allocating a new array.
 
-    fn add_assign( &mut self, other: Bag )
+    fn add_assign( &mut self, other: Bag<Type> )
     {
-        let mut old_capacity = self.data.len();
+        let longer_capacity = self.data.len() + other.data.len();
 
-        self.data.truncate( self.used );
-        self.data.extend_from_slice( &other.data[ ..other.used ] );
-        self.used += other.used;
-
-        if self.used < old_capacity
+        if longer_capacity > self.data.capacity()
         {
-            old_capacity -= self.data.len();
-            self.data.extend( vec![ f64::default(); old_capacity ] );
+            self.data.reserve_exact( longer_capacity );
         }
+
+        self.data.extend_from_slice( &other.data[ .. ] );
     }
 }
 
-impl ::std::ops::Add for Bag
+impl<Type: PartialEq + Clone> ::std::ops::Add for Bag<Type>
 {
-    type Output = Bag;
+    type Output = Bag<Type>;
 
     /// Create a new bag that contains all the elements from two other bags.
     ///
@@ -621,22 +632,21 @@ impl ::std::ops::Add for Bag
     /// A new bag that is the union of `self` and `other`.
     ///
     /// # Panics
-    /// If `self.used + other.used` would cause an
+    /// If `self.data.len() + other.data.len()` would cause an
     /// unsigned integer overflow.
     ///
     /// # Aborts
     /// OOM: Insufficient memory for allocating a new array.
 
-    fn add( self, other: Bag ) -> Bag
+    fn add( self, other: Bag<Type> ) -> Bag<Type>
     {
-        Bag { data: [ &self.data[ ..self.used ]
-                , &other.data[ ..other.used ] ]
-                .concat()
-            , used: self.used + other.used }
+        Bag { data: [ &self.data[ .. ]
+                    , &other.data[ .. ] ]
+                    .concat() }
     }
 }
 
-impl ::std::fmt::Debug for Bag
+impl<Type: PartialEq + Clone + Default + ::std::fmt::Debug> ::std::fmt::Debug for Bag<Type>
 {
     /// Renders the bag's contents into a human readable form.
     ///
@@ -651,21 +661,39 @@ impl ::std::fmt::Debug for Bag
 
     fn fmt( &self, fmt: &mut ::std::fmt::Formatter ) -> ::std::fmt::Result
     {
-        write!( fmt, "Bag with {:?} elements: [", self.used )?;
+        write!( fmt, "Bag with {:?} elements: [", self.data.len() )?;
 
-        if self.used == 0
+        if self.data.len() == 0
         {
             write!( fmt, " ]" )
         }
         else
         {
-            self.data[ ..( self.used - 1 ) ].iter().for_each(
+            self.data[ ..( self.data.len() - 1 ) ].iter().for_each(
                 |value| write!( fmt, " {:?},",value ).unwrap() );
                     // the write returned value is dropped instead of propogated
 
             write!( fmt, " {:?} ] Capacity: {:?}",
-                    self.data[ self.used - 1 ],
-                    self.data.len() )
+                    self.data.last(),
+                    self.data.capacity() )
         }
+    }
+}
+
+impl<Type: PartialEq + Clone + Default + ::std::hash::Hash> ::std::hash::Hash for Bag<Type>
+{
+    /// Create a hash value for the bag.
+    ///
+    /// Used for places that need a hash, like a hashmap.
+    ///
+    /// # Precondition
+    /// The type in the bag implements the trait: `Hash`.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method.
+
+    fn hash<HashType: ::std::hash::Hasher>( &self, state: &mut HashType )
+    {
+        self.data.hash( state );
     }
 }
