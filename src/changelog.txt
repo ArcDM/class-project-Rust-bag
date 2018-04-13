@@ -30,11 +30,25 @@ Implemented:
     Made a f64 bag
         Very simple change of a few parameters.
 
+    8.4.2018
+    Added a 3rd-party library of traits that matches the methods that were implemented
+        The most visible change is the names of the methods. The implementation is the same.
+        This sets the naminging to match the convention seen in Rust.
+        Gives me experience in using a library that is not in the std.
+
+    Added documentation for most files in the project:
+        bagexamf64.rs, bagexam.rs, bag.rs, bagf64.rs, bagVec.rs
+        Included verbose descriptions and serveral examples.
+
 In_Combat:
-    <None>
+    Explicit documentation
+        main.rs, bagtest.rs
 
 Planned:
     Explicit documentation
+    Assess functions in bag for a different implementation
+        insert
+    Add a forward iterator
 
 Abandonded:
     Assess functions in bag for a different implementation
