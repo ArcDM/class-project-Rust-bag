@@ -79,18 +79,18 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &1 );
-    /// bag.insert( &2 );
-    /// bag.insert( &2 );
-    /// bag.insert( &3 );
-    /// bag.insert( &3 );
-    /// bag.insert( &3 );
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
+    /// bag.insert( 3 );
+    /// bag.insert( 3 );
     ///
-    /// assert_eq!( bag.erase( &2 ), 2 );
+    /// assert_eq!( bag.erase( 2 ), 2 );
     /// assert_eq!( bag.size(), 4 );
     /// ```
 
-    pub fn erase( &mut self, target: &Type ) -> usize
+    pub fn erase( &mut self, target: Type ) -> usize
     {
         let old_used = self.used;
         let mut index = 0;
@@ -99,7 +99,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
         //  range of 0 to this.used, which can vary though the loop
         while index < self.used
         {
-            if self.data[ index ] == *target
+            if self.data[ index ] == target
             {
                self.used -= 1;
                self.data[ index ] = self.data[ self.used ].clone();
@@ -132,17 +132,17 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &1 );
-    /// bag.insert( &2 );
-    /// bag.insert( &3 );
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
     ///
-    /// assert!( bag.erase( &2 ) );
+    /// assert!( bag.erase( 2 ) );
     /// assert_eq!( bag.size(), 2 );
     /// ```
 
-    pub fn erase_one( &mut self, target: &Type ) -> bool
+    pub fn erase_one( &mut self, target: Type ) -> bool
     {
-        match self.data[ ..self.used ].iter().position( | value | value == target )
+        match self.data[ ..self.used ].iter().position( | value | *value == target )
         {
             None    =>      false,
             Some( index ) =>  
@@ -175,16 +175,16 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// ```
     /// let mut bag = Bag::new();
     ///
-    /// bag.insert( &2 );
-    /// bag.insert( &4 );
-    /// bag.insert( &6 );
+    /// bag.insert( 2 );
+    /// bag.insert( 4 );
+    /// bag.insert( 6 );
     /// assert_eq!( bag.size(), 3 );
     ///
-    /// bag.insert( &3 );
+    /// bag.insert( 3 );
     /// assert_eq!( bag.size(), 4 );
     /// ```
 
-    pub fn insert( &mut self, new_item: &Type )
+    pub fn insert( &mut self, new_item: Type )
     {
         if self.used == self.data.len()
         {
@@ -192,7 +192,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
             self.data.extend( vec![ Type::default(); extra_capacity ] );
         }
 
-        self.data[ self.used ] = ( *new_item ).clone();
+        self.data[ self.used ] = new_item;
         self.used += 1;
     }
 
@@ -212,20 +212,20 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &2 );
-    /// bag.insert( &4 );
-    /// bag.insert( &4 );
-    /// bag.insert( &6 );
-    /// bag.insert( &6 );
-    /// bag.insert( &6 );
+    /// bag.insert( 2 );
+    /// bag.insert( 4 );
+    /// bag.insert( 4 );
+    /// bag.insert( 6 );
+    /// bag.insert( 6 );
+    /// bag.insert( 6 );
     ///
-    /// assert_eq!( bag.occurrences( &4 ), 2 );
+    /// assert_eq!( bag.occurrences( 4 ), 2 );
     /// ```
 
-    pub fn occurrences( &self, target: &Type ) -> usize
+    pub fn occurrences( &self, target: Type ) -> usize
     {
         self.data[ ..self.used ].iter()
-                                .filter( | &value | value == target )
+                                .filter( | &value | *value == target )
                                 .count()
     }
 }
@@ -244,9 +244,9 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Len for Bag<Type>
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &2 );
-    /// bag.insert( &4 );
-    /// bag.insert( &6 );
+    /// bag.insert( 2 );
+    /// bag.insert( 4 );
+    /// bag.insert( 6 );
     ///
     /// assert_eq!( bag.len(), 3 );
     /// ```
@@ -273,7 +273,7 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Empty for Bag<Type>
     /// let mut bag = Bag::new();
     /// assert!( bag.is_empty() );
     ///
-    /// bag.insert( &1 );
+    /// bag.insert( 1 );
     /// assert!( !bag.is_empty() );
     /// ```
 
@@ -294,9 +294,9 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Clear for Bag<Type>
     ///
     /// ```
     /// let mut bag = Bag::new();
-    /// bag.insert( &1 );
-    /// bag.insert( &2 );
-    /// bag.insert( &3 );
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
     /// assert!( !bag.is_empty() );
     ///
     /// bag.clear();
@@ -366,7 +366,7 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::WithCapacity for Ba
     /// }
     ///
     /// // ...but this will cause the capacity to increase
-    /// bag.insert( &11 );
+    /// bag.insert( 11 );
     /// ```
 
     fn with_capacity( initial_capacity: usize ) -> Self
@@ -445,9 +445,9 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::CapacityMut for Bag
     ///
     /// ```
     /// let mut bag = Bag::with_capacity( 10 );
-    /// bag.insert( &1 );
-    /// bag.insert( &2 );
-    /// bag.insert( &3 );
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
     /// assert_eq!( bag.capacity(), 10 );
     ///
     /// bag.shrink_to_fit();
