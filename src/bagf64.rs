@@ -19,10 +19,19 @@
 
 pub extern crate len_trait;
 
+pub use self::len_trait::len::{ Len, Empty, Clear };
+pub use self::len_trait::capacity::{ Capacity, WithCapacity, CapacityMut };
+pub use std::default::Default;
+pub use std::clone::Clone;
+pub use std::cmp::PartialEq;
+pub use std::ops::{ AddAssign, Add };
+pub use std::fmt::Debug;
+pub use std::iter::IntoIterator;
+pub use std::iter::Iterator;
+
 /// A container for inserting and removing given values.
 ///
 /// # Invariant of the Bag struct:
-///
 /// 1. The number of elements in the bag is in the instance variable used.
 ///
 /// 2. For an empty bag, we do not care what is stored in any of data;
@@ -30,9 +39,12 @@ pub extern crate len_trait;
 /// through `data[ used - 1 ]`, and we don't care what's in the
 /// rest of data.
 
+#[ allow( non_camel_case_types ) ]
+type value_type = f64;
+
 pub struct Bag
 {
-   data: Vec<f64>,
+   data: Vec< value_type >,
    used: usize
 }
 
@@ -47,7 +59,6 @@ impl Bag
     /// OOM: Insufficient memory for allocating a new array.
     ///
     /// # Examples
-    ///
     /// ```
     /// # #![allow(unused_mut)]
     /// let mut bag = Bag::new();
@@ -55,7 +66,7 @@ impl Bag
 
     pub fn new() -> Self
     {
-        Bag { data: vec![ f64::default(); 1 ], used: 0 }
+        Bag { data: vec![ value_type::default(); 1 ], used: 0 }
     }
 
     /// Erase all copies of a specified element from this bag if target exists in bag.
@@ -73,7 +84,6 @@ impl Bag
     /// An unsigned integer value representing the number of items erased from bag.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 1.0 );
@@ -84,10 +94,10 @@ impl Bag
     /// bag.insert( 3.0 );
     ///
     /// assert_eq!( bag.erase( 2.0 ), 2 );
-    /// assert_eq!( bag.size(), 4 );
+    /// assert_eq!( bag.len(), 4 );
     /// ```
 
-    pub fn erase( &mut self, target: f64 ) -> usize
+    pub fn erase( &mut self, target: value_type ) -> usize
     {
         let old_used = self.used;
         let mut index = 0;
@@ -126,7 +136,6 @@ impl Bag
     /// True or false depending on whether `target` exists in the bag.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 1.0 );
@@ -134,10 +143,10 @@ impl Bag
     /// bag.insert( 3.0 );
     ///
     /// assert!( bag.erase( 2.0 ) );
-    /// assert_eq!( bag.size(), 2 );
+    /// assert_eq!( bag.len(), 2 );
     /// ```
 
-    pub fn erase_one( &mut self, target: f64 ) -> bool
+    pub fn erase_one( &mut self, target: value_type ) -> bool
     {
         match self.data[ ..self.used ].iter().position( | value | *value == target )
         {
@@ -168,25 +177,24 @@ impl Bag
     /// OOM: Insufficient memory for allocating a new array.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     ///
     /// bag.insert( 2.0 );
     /// bag.insert( 4.0 );
     /// bag.insert( 6.0 );
-    /// assert_eq!( bag.size(), 3 );
+    /// assert_eq!( bag.len(), 3 );
     ///
     /// bag.insert( 3.0 );
-    /// assert_eq!( bag.size(), 4 );
+    /// assert_eq!( bag.len(), 4 );
     /// ```
 
-    pub fn insert( &mut self, new_item: f64 )
+    pub fn insert( &mut self, new_item: value_type )
     {
         if self.used == self.data.len()
         {
             let extra_capacity = self.data.len();
-            self.data.extend( vec![ f64::default(); extra_capacity ] );
+            self.data.extend( vec![ value_type::default(); extra_capacity ] );
         }
 
         self.data[ self.used ] = new_item;
@@ -206,7 +214,6 @@ impl Bag
     /// The number of times that `target` occurs in this bag.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 2.0 );
@@ -219,7 +226,7 @@ impl Bag
     /// assert_eq!( bag.occurrences( 4.0 ), 2 );
     /// ```
 
-    pub fn occurrences( &self, target: f64 ) -> usize
+    pub fn occurrences( &self, target: value_type ) -> usize
     {
         self.data[ ..self.used ].iter()
                                 .filter( | &value | *value == target )
@@ -227,7 +234,7 @@ impl Bag
     }
 }
 
-impl len_trait::len::Len for Bag
+impl Len for Bag
 {
     /// Determine the number of elements in this bag.
     ///
@@ -238,7 +245,6 @@ impl len_trait::len::Len for Bag
     /// The number of elements in this bag.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 2.0 );
@@ -254,7 +260,7 @@ impl len_trait::len::Len for Bag
     }
 }
 
-impl len_trait::len::Empty for Bag
+impl Empty for Bag
 {
     /// Determine if the bag is empty.
     ///
@@ -265,7 +271,6 @@ impl len_trait::len::Empty for Bag
     /// True if the bag is empty, else false.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// assert!( bag.is_empty() );
@@ -280,7 +285,7 @@ impl len_trait::len::Empty for Bag
     }
 }
 
-impl len_trait::len::Clear for Bag
+impl Clear for Bag
 {
     /// Empty the bag.
     ///
@@ -288,7 +293,6 @@ impl len_trait::len::Clear for Bag
     /// The capacity of the bag is not altered.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 1.0 );
@@ -306,7 +310,7 @@ impl len_trait::len::Clear for Bag
     }
 }
 
-impl len_trait::capacity::Capacity for Bag
+impl Capacity for Bag
 {
     /// Return the current capacity of the bag.
     ///
@@ -317,9 +321,8 @@ impl len_trait::capacity::Capacity for Bag
     /// An unsigned integer that represents total capacity of this bag.
     ///
     /// # Examples
-    ///
     /// ```
-    /// let mut bag = Bag::WithCapacity( 10 );
+    /// let mut bag = Bag::with_capacity( 10 );
     /// assert_eq!( bag.capacity(), 10 );
     /// ```
 
@@ -329,7 +332,7 @@ impl len_trait::capacity::Capacity for Bag
     }
 }
 
-impl len_trait::capacity::WithCapacity for Bag
+impl WithCapacity for Bag
 {
     /// Initialize an empty bag having a capacity of `initial_capacity`.
     ///
@@ -349,9 +352,8 @@ impl len_trait::capacity::WithCapacity for Bag
     /// OOM: Insufficient memory for allocating a new array.
     ///
     /// # Examples
-    ///
     /// ```
-    /// let mut bag = Bag::WithCapacity( 10 );
+    /// let mut bag = Bag::with_capacity( 10 );
     ///
     /// // The bag contains no items, even though it has capacity for more
     /// assert_eq!( bag.len(), 0 );
@@ -374,12 +376,12 @@ impl len_trait::capacity::WithCapacity for Bag
         }
         else
         {
-            Bag { data: vec![ f64::default(); initial_capacity ], used: 0 }
+            Bag { data: vec![ value_type::default(); initial_capacity ], used: 0 }
         }
     }
 }
 
-impl len_trait::capacity::CapacityMut for Bag
+impl CapacityMut for Bag
 {
     /// Potentially increase capacity of this bag.
     ///
@@ -406,7 +408,6 @@ impl len_trait::capacity::CapacityMut for Bag
     /// OOM: Insufficient memory for allocating a new array.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.reserve( 10 );
@@ -425,7 +426,7 @@ impl len_trait::capacity::CapacityMut for Bag
             if self.data.len() < new_capacity
             {
                 new_capacity -= self.data.len();
-                self.data.extend( vec![ f64::default(); new_capacity ] );
+                self.data.extend( vec![ value_type::default(); new_capacity ] );
             }
         }
     }
@@ -439,7 +440,6 @@ impl len_trait::capacity::CapacityMut for Bag
     /// number of items in bag but must be at least one.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::with_capacity( 10 );
     /// bag.insert( 1.0 );
@@ -478,7 +478,7 @@ impl Default for Bag
 
     fn default() -> Self
     {
-        Bag { data: vec![ f64::default(); 1 ], used: 0 }
+        Bag { data: vec![ value_type::default(); 1 ], used: 0 }
     }
 }
 
@@ -529,7 +529,7 @@ impl Clone for Bag
     }
 }
 
-impl ::std::cmp::PartialEq for Bag
+impl PartialEq for Bag
 {
     /// Compare this bag to another for equality of value.
     ///
@@ -570,7 +570,7 @@ impl ::std::cmp::PartialEq for Bag
     }
 }
 
-impl ::std::ops::AddAssign for Bag
+impl AddAssign for Bag
 {
     /// Add the contents of another bag to this bag.
     ///
@@ -600,12 +600,12 @@ impl ::std::ops::AddAssign for Bag
         if self.used < old_capacity
         {
             old_capacity -= self.data.len();
-            self.data.extend( vec![ f64::default(); old_capacity ] );
+            self.data.extend( vec![ value_type::default(); old_capacity ] );
         }
     }
 }
 
-impl ::std::ops::Add for Bag
+impl Add for Bag
 {
     type Output = Bag;
 
@@ -636,7 +636,7 @@ impl ::std::ops::Add for Bag
     }
 }
 
-impl ::std::fmt::Debug for Bag
+impl Debug for Bag
 {
     /// Renders the bag's contents into a human readable form.
     ///
@@ -667,5 +667,216 @@ impl ::std::fmt::Debug for Bag
                     self.data[ self.used - 1 ],
                     self.data.len() )
         }
+    }
+}
+
+/// An iterator that references a Bag structure
+
+pub struct BagIterator<'a>
+{
+    bag: &'a Bag,
+    index: Option<usize>
+}
+
+impl<'a> IntoIterator for &'a Bag
+{
+    type Item = &'a value_type;
+    type IntoIter = BagIterator<'a>;
+
+    /// Generate an iterator for the Bag.
+    ///
+    /// # Postcondition
+    /// The Bag is not altered.
+    ///
+    /// # Return
+    /// A new iterator referencing the Bag.
+    ///
+    /// # Aborts
+    /// OOM: Insufficient memory for allocation.
+
+    fn into_iter( self ) -> Self::IntoIter
+    {
+        BagIterator { bag: self, index: None }
+    }
+}
+
+impl<'a> BagIterator<'a>
+{
+    /// Generate an iterator for the Bag.
+    ///
+    /// # Postcondition
+    /// The Bag is not altered.
+    ///
+    /// # Return
+    /// A new iterator referencing the Bag.
+    ///
+    /// # Aborts
+    /// OOM: Insufficient memory for allocation.
+
+    pub fn new( source: &'a Bag ) -> BagIterator<'a>
+    {
+        BagIterator { bag: source, index: None }
+    }
+}
+
+impl<'a> Iterator for BagIterator<'a>
+{
+    type Item = &'a value_type;
+
+    /// Advances the iterator and returns the next value.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method and the iterator's index will change.
+    ///
+    /// # Return
+    /// The next value in the bag or None if the iteration is finished.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut bag = Bag::new();
+    /// bag.insert( 1.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 3.0 );
+    ///
+    /// let mut iter = bag.into_iter();
+    ///
+    /// // A call to next() returns the next value...
+    /// assert_eq!( Some( &1.0 ), iter.next() );
+    /// assert_eq!( Some( &2.0 ), iter.next() );
+    /// assert_eq!( Some( &3.0 ), iter.next() );
+    ///
+    /// // ... and then None once it's over.
+    /// assert_eq!( None, iter.next() );
+    ///
+    /// // More calls may or may not return None. Here, they always will.
+    /// assert_eq!( None, iter.next() );
+    /// assert_eq!( None, iter.next() ); 
+    /// ```
+
+    fn next( &mut self ) -> Option<Self::Item>
+    {
+        let next_index = 
+            match self.index
+            {
+                Some( i ) => i + 1,
+                None => 0
+            };
+
+        self.index = Some( next_index );
+        self.bag.data[ ..self.bag.used ].get( next_index )
+    }
+
+    /// Consumes the iterator, counting the number of iterations remaining.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method and the iterator is consumed.
+    ///
+    /// # Return
+    /// The number of elements left in the iterator.
+    ///
+    /// # Examples 
+    /// ```
+    /// let mut bag = Bag::new();
+    /// bag.insert( 1.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 3.0 );
+    /// assert_eq!( bag.into_iter().count(), 3 );
+    ///
+    /// bag.insert( 4.0 );
+    /// bag.insert( 5.0 );
+    /// assert_eq!( bag.into_iter().count(), 5 ); 
+    /// ```
+
+    fn count( self ) -> usize
+    {
+        match self.index
+        {
+            Some( i ) => {
+                            if self.bag.used - i > 0
+                            {
+                                self.bag.used - i
+                            }
+                            else
+                            {
+                                0
+                            }
+                        },
+            None => self.bag.used
+        }
+    }
+
+    /// Consumes the iterator, returning the last element.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method and the iterator is consumed.
+    ///
+    /// # Return
+    /// The last element in the iterator or None if the lenght is zero.
+    ///
+    /// # Examples 
+    /// ```
+    /// let mut bag = Bag::new();
+    /// bag.insert( 5.0 );
+    /// bag.insert( 4.0 );
+    /// bag.insert( 3.0 );
+    /// assert_eq!( bag.into_iter().last(), Some( &3.0 ) );
+    ///
+    /// bag.insert( 2.0 );
+    /// bag.insert( 1.0 );
+    /// assert_eq!( bag.into_iter().last(), Some( &1.0 ) ); 
+    /// ```
+
+    fn last( self ) -> Option<Self::Item>
+    {
+        if self.bag.used > 0
+        {
+            self.bag.data.get( self.bag.used - 1 )
+        }
+        else
+        {
+            None
+        }
+    }
+
+    /// Returns the nth element of the iterator.
+    ///
+    /// # Parameter: `n`
+    /// The non-negative offset from the iterator's index to access.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method and the iterator's index may change.
+    ///
+    /// # Return
+    /// The nth element of the iterator or None if n is beyond the lenght of the iterator.
+    ///
+    /// # Note
+    /// The nth element of the iterator is not necessarily the nth element in the bag.
+    /// 
+    /// Calling nth( _ ) will not reset the iterator's index to its original state.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut bag = Bag::new();
+    /// bag.insert( 1.0 );
+    /// bag.insert( 2.0 );
+    /// bag.insert( 3.0 );
+    ///
+    /// let mut iter = bag.into_iter();
+    ///
+    /// assert_eq!( iter.nth( 1 ), Some( &2.0 ) );
+    /// assert_eq!( iter.nth( 1 ), None ); 
+    /// ```
+
+    fn nth( &mut self, n: usize ) -> Option<Self::Item>
+    {
+        let next_index = 
+            match self.index
+            {
+                Some( i ) => i + n + 1,
+                None => n
+            };
+
+        self.index = Some( next_index );
+        self.bag.data[ ..self.bag.used ].get( next_index )
     }
 }
