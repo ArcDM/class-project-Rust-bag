@@ -20,12 +20,21 @@
 #![ allow( dead_code ) ]
 
 pub extern crate len_trait;
-use std::cmp::PartialEq;
+
+pub use self::len_trait::len::{ Len, Empty, Clear };
+pub use self::len_trait::capacity::{ Capacity, WithCapacity, CapacityMut };
+pub use std::default::Default;
+pub use std::clone::Clone;
+pub use std::cmp::PartialEq;
+pub use std::ops::{ AddAssign, Add };
+pub use std::fmt::Debug;
+pub use std::hash::Hash;
+pub use std::iter::IntoIterator;
+pub use std::iter::Iterator;
 
 /// A container for inserting and removing given values.
 ///
 /// # Invariant of the Bag struct:
-///
 /// 1. The number of elements in the bag is in the instance variable used.
 ///
 /// 2. For an empty bag, we do not care what is stored in any of data;
@@ -42,6 +51,8 @@ pub struct Bag<Type: PartialEq + Clone + Default>
 impl<Type: PartialEq + Clone + Default> Bag<Type>
 {
     /// Initialize an empty bag.
+    /// 
+    /// Implementation matches Default Constructor.
     ///
     /// # Return
     /// A bag that is empty and has a capacity of one.
@@ -50,7 +61,6 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// OOM: Insufficient memory for allocating a new array.
     ///
     /// # Examples
-    ///
     /// ```
     /// # #![allow(unused_mut)]
     /// let mut bag = Bag::new();
@@ -62,6 +72,8 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     }
 
     /// Erase all copies of a specified element from this bag if target exists in bag.
+    /// 
+    /// Implementation matches erase( target ).
     ///
     /// # Parameter: `target`
     /// The element(s) to remove from the bag.
@@ -76,7 +88,6 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// An unsigned integer value representing the number of items erased from bag.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 1 );
@@ -87,7 +98,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// bag.insert( 3 );
     ///
     /// assert_eq!( bag.erase( 2 ), 2 );
-    /// assert_eq!( bag.size(), 4 );
+    /// assert_eq!( bag.len(), 4 );
     /// ```
 
     pub fn erase( &mut self, target: Type ) -> usize
@@ -114,6 +125,8 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     }
 
     /// Remove one copy of a specified element from this bag.
+    /// 
+    /// Implementation matches erase_one( target ).
     ///
     /// # Parameter: `target`
     /// The element to remove from the bag.
@@ -129,7 +142,6 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// True or false depending on whether `target` exists in the bag.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 1 );
@@ -137,7 +149,7 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// bag.insert( 3 );
     ///
     /// assert!( bag.erase( 2 ) );
-    /// assert_eq!( bag.size(), 2 );
+    /// assert_eq!( bag.len(), 2 );
     /// ```
 
     pub fn erase_one( &mut self, target: Type ) -> bool
@@ -155,6 +167,8 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     }
 
     /// Add a new element to this bag doubling capacity if needed.
+    /// 
+    /// Implementation matches insert( entry ).
     ///
     /// # Parameter: `new_item`
     /// The new element that is being inserted.
@@ -171,17 +185,16 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// OOM: Insufficient memory for allocating a new array.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     ///
     /// bag.insert( 2 );
     /// bag.insert( 4 );
     /// bag.insert( 6 );
-    /// assert_eq!( bag.size(), 3 );
+    /// assert_eq!( bag.len(), 3 );
     ///
     /// bag.insert( 3 );
-    /// assert_eq!( bag.size(), 4 );
+    /// assert_eq!( bag.len(), 4 );
     /// ```
 
     pub fn insert( &mut self, new_item: Type )
@@ -198,6 +211,8 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
 
     /// Accessor method to count the number of occurrences of a
     /// particular element in this bag.
+    /// 
+    /// Implementation matches occurrences( target ).
     ///
     /// # Parameter: `target`
     /// The element for which number of occurrences will be counted.
@@ -209,7 +224,6 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     /// The number of times that `target` occurs in this bag.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 2 );
@@ -230,9 +244,11 @@ impl<Type: PartialEq + Clone + Default> Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> len_trait::len::Len for Bag<Type>
+impl<Type: PartialEq + Clone + Default> Len for Bag<Type>
 {
     /// Determine the number of elements in this bag.
+    /// 
+    /// Implementation matches size().
     ///
     /// # Postcondition
     /// This method does not alter state of the bag.
@@ -241,7 +257,6 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Len for Bag<Type>
     /// The number of elements in this bag.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 2 );
@@ -257,7 +272,7 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Len for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> len_trait::len::Empty for Bag<Type>
+impl<Type: PartialEq + Clone + Default> Empty for Bag<Type>
 {
     /// Determine if the bag is empty.
     ///
@@ -268,7 +283,6 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Empty for Bag<Type>
     /// True if the bag is empty, else false.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// assert!( bag.is_empty() );
@@ -283,7 +297,7 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Empty for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> len_trait::len::Clear for Bag<Type>
+impl<Type: PartialEq + Clone + Default> Clear for Bag<Type>
 {
     /// Empty the bag.
     ///
@@ -291,7 +305,6 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Clear for Bag<Type>
     /// The capacity of the bag is not altered.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.insert( 1 );
@@ -309,9 +322,11 @@ impl<Type: PartialEq + Clone + Default> len_trait::len::Clear for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> len_trait::capacity::Capacity for Bag<Type>
+impl<Type: PartialEq + Clone + Default> Capacity for Bag<Type>
 {
     /// Return the current capacity of the bag.
+    /// 
+    /// Implementation matches getCapacity().
     ///
     /// # Postcondition
     /// This method does not alter state of the bag.
@@ -320,9 +335,8 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::Capacity for Bag<Ty
     /// An unsigned integer that represents total capacity of this bag.
     ///
     /// # Examples
-    ///
     /// ```
-    /// let mut bag = Bag::WithCapacity( 10 );
+    /// let mut bag = Bag::with_capacity( 10 );
     /// assert_eq!( bag.capacity(), 10 );
     /// ```
 
@@ -332,9 +346,11 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::Capacity for Bag<Ty
     }
 }
 
-impl<Type: PartialEq + Clone + Default> len_trait::capacity::WithCapacity for Bag<Type>
+impl<Type: PartialEq + Clone + Default> WithCapacity for Bag<Type>
 {
     /// Initialize an empty bag having a capacity of `initial_capacity`.
+    /// 
+    /// Implementation matches constructor with expressed capacity.
     ///
     /// # Parameter: `initial_capacity`
     /// An unsigned integer greater than 0.
@@ -352,9 +368,8 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::WithCapacity for Ba
     /// OOM: Insufficient memory for allocating a new array.
     ///
     /// # Examples
-    ///
     /// ```
-    /// let mut bag = Bag::WithCapacity( 10 );
+    /// let mut bag = Bag::with_capacity( 10 );
     ///
     /// // The bag contains no items, even though it has capacity for more
     /// assert_eq!( bag.len(), 0 );
@@ -382,9 +397,11 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::WithCapacity for Ba
     }
 }
 
-impl<Type: PartialEq + Clone + Default> len_trait::capacity::CapacityMut for Bag<Type>
+impl<Type: PartialEq + Clone + Default> CapacityMut for Bag<Type>
 {
     /// Potentially increase capacity of this bag.
+    /// 
+    /// Implementation matches ensureCapacity( newCapacity ).
     ///
     /// # Parameter: `new_capacity`
     /// An unsigned integer greater than 0.
@@ -409,7 +426,6 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::CapacityMut for Bag
     /// OOM: Insufficient memory for allocating a new array.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::new();
     /// bag.reserve( 10 );
@@ -435,6 +451,8 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::CapacityMut for Bag
 
     /// Reduces the capacity of this bag to current size if there is
     /// excess capacity.
+    /// 
+    /// Implementation matches trimToSize().
     ///
     /// # Postcondition
     /// Capacity of this bag is reduced to the current number
@@ -442,7 +460,6 @@ impl<Type: PartialEq + Clone + Default> len_trait::capacity::CapacityMut for Bag
     /// number of items in bag but must be at least one.
     ///
     /// # Examples
-    ///
     /// ```
     /// let mut bag = Bag::with_capacity( 10 );
     /// bag.insert( 1 );
@@ -488,6 +505,8 @@ impl<Type: PartialEq + Clone + Default> Default for Bag<Type>
 impl<Type: PartialEq + Clone + Default> Clone for Bag<Type>
 {
     /// Generate a copy of this bag.
+    /// 
+    /// Implementation matches copy constructor and assignment operator.
     ///
     /// # Postcondition
     /// * The clone is not the same object as the source.
@@ -513,6 +532,8 @@ impl<Type: PartialEq + Clone + Default> Clone for Bag<Type>
     }
 
     /// Make a copy from a source.
+    /// 
+    /// Implementation matches copy constructor.
     ///
     /// # Parameter: `source`
     /// A reference to a bag that is to be copied.
@@ -535,6 +556,8 @@ impl<Type: PartialEq + Clone + Default> Clone for Bag<Type>
 impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
 {
     /// Compare this bag to another for equality of value.
+    /// 
+    /// Implementation matches equality operator.
     ///
     /// # Parameter: `other`
     /// The bag to compare to `self`.
@@ -555,6 +578,8 @@ impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
     }
 
     /// Compare this bag to another object for inequality of value.
+    /// 
+    /// Implementation matches inequality operator.
     ///
     /// # Parameter: `other`
     /// The  bag to compare to `self`.
@@ -573,9 +598,11 @@ impl<Type: PartialEq + Clone + Default> PartialEq for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> ::std::ops::AddAssign for Bag<Type>
+impl<Type: PartialEq + Clone + Default> AddAssign for Bag<Type>
 {
     /// Add the contents of another bag to this bag.
+    /// 
+    /// Implementation matches add assignment operator.
     ///
     /// # Parameter: `other`
     /// A bag whose contents will be added to `self`.
@@ -608,11 +635,13 @@ impl<Type: PartialEq + Clone + Default> ::std::ops::AddAssign for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default> ::std::ops::Add for Bag<Type>
+impl<Type: PartialEq + Clone + Default> Add for Bag<Type>
 {
     type Output = Bag<Type>;
 
     /// Create a new bag that contains all the elements from two other bags.
+    /// 
+    /// Implementation matches addition operator.
     ///
     /// # Parameter: `other`
     /// The bag to be added with `self`.
@@ -639,9 +668,11 @@ impl<Type: PartialEq + Clone + Default> ::std::ops::Add for Bag<Type>
     }
 }
 
-impl<Type: PartialEq + Clone + Default + ::std::fmt::Debug> ::std::fmt::Debug for Bag<Type>
+impl<Type: PartialEq + Clone + Default + Debug> Debug for Bag<Type>
 {
     /// Renders the bag's contents into a human readable form.
+    /// 
+    /// Implementation matches string buffer operator.
     ///
     /// # Precondition
     /// The type in the bag implements the trait: `Debug`.
@@ -673,9 +704,11 @@ impl<Type: PartialEq + Clone + Default + ::std::fmt::Debug> ::std::fmt::Debug fo
     }
 }
 
-impl<Type: PartialEq + Clone + Default + ::std::hash::Hash> ::std::hash::Hash for Bag<Type>
+impl<Type: PartialEq + Clone + Default + Hash> Hash for Bag<Type>
 {
     /// Create a hash value for the bag.
+    /// 
+    /// Implementation matches hashCode().
     ///
     /// Used for places that need a hash, like a hashmap.
     ///
@@ -689,5 +722,216 @@ impl<Type: PartialEq + Clone + Default + ::std::hash::Hash> ::std::hash::Hash fo
     {
         self.used.hash( state );
         self.data[ ..self.used ].hash( state );
+    }
+}
+
+/// An iterator that references a Bag structure
+
+pub struct BagIterator<'a, Type: 'a + PartialEq + Clone + Default>
+{
+    bag: &'a Bag<Type>,
+    index: Option<usize>
+}
+
+impl<'a, Type: PartialEq + Clone + Default> IntoIterator for &'a Bag<Type>
+{
+    type Item = &'a Type;
+    type IntoIter = BagIterator<'a, Type>;
+
+    /// Generate an iterator for the Bag.
+    ///
+    /// # Postcondition
+    /// The Bag is not altered.
+    ///
+    /// # Return
+    /// A new iterator referencing the Bag.
+    ///
+    /// # Aborts
+    /// OOM: Insufficient memory for allocation.
+
+    fn into_iter( self ) -> Self::IntoIter
+    {
+        BagIterator { bag: self, index: None }
+    }
+}
+
+impl<'a, Type: PartialEq + Clone + Default> BagIterator<'a, Type>
+{
+    /// Generate an iterator for the Bag.
+    ///
+    /// # Postcondition
+    /// The Bag is not altered.
+    ///
+    /// # Return
+    /// A new iterator referencing the Bag.
+    ///
+    /// # Aborts
+    /// OOM: Insufficient memory for allocation.
+
+    pub fn new( source: &'a Bag<Type> ) -> BagIterator<'a, Type>
+    {
+        BagIterator { bag: source, index: None }
+    }
+}
+
+impl<'a, Type: PartialEq + Clone + Default> Iterator for BagIterator<'a, Type>
+{
+    type Item = &'a Type;
+
+    /// Advances the iterator and returns the next value.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method and the iterator's index will change.
+    ///
+    /// # Return
+    /// The next value in the bag or None if the iteration is finished.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut bag = Bag::new();
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
+    ///
+    /// let mut iter = bag.into_iter();
+    ///
+    /// // A call to next() returns the next value...
+    /// assert_eq!( Some( &1 ), iter.next() );
+    /// assert_eq!( Some( &2 ), iter.next() );
+    /// assert_eq!( Some( &3 ), iter.next() );
+    ///
+    /// // ... and then None once it's over.
+    /// assert_eq!( None, iter.next() );
+    ///
+    /// // More calls may or may not return None. Here, they always will.
+    /// assert_eq!( None, iter.next() );
+    /// assert_eq!( None, iter.next() ); 
+    /// ```
+
+    fn next( &mut self ) -> Option<Self::Item>
+    {
+        let next_index = 
+            match self.index
+            {
+                Some( i ) => i + 1,
+                None => 0
+            };
+
+        self.index = Some( next_index );
+        self.bag.data[ ..self.bag.used ].get( next_index )
+    }
+
+    /// Consumes the iterator, counting the number of iterations remaining.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method and the iterator is consumed.
+    ///
+    /// # Return
+    /// The number of elements left in the iterator.
+    ///
+    /// # Examples 
+    /// ```
+    /// let mut bag = Bag::new();
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
+    /// assert_eq!( bag.into_iter().count(), 3 );
+    ///
+    /// bag.insert( 4 );
+    /// bag.insert( 5 );
+    /// assert_eq!( bag.into_iter().count(), 5 ); 
+    /// ```
+
+    fn count( self ) -> usize
+    {
+        match self.index
+        {
+            Some( i ) => {
+                            if self.bag.used - i > 0
+                            {
+                                self.bag.used - i
+                            }
+                            else
+                            {
+                                0
+                            }
+                        },
+            None => self.bag.used
+        }
+    }
+
+    /// Consumes the iterator, returning the last element.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method and the iterator is consumed.
+    ///
+    /// # Return
+    /// The last element in the iterator or None if the lenght is zero.
+    ///
+    /// # Examples 
+    /// ```
+    /// let mut bag = Bag::new();
+    /// bag.insert( 5 );
+    /// bag.insert( 4 );
+    /// bag.insert( 3 );
+    /// assert_eq!( bag.into_iter().last(), Some( &3 ) );
+    ///
+    /// bag.insert( 2 );
+    /// bag.insert( 1 );
+    /// assert_eq!( bag.into_iter().last(), Some( &1 ) ); 
+    /// ```
+
+    fn last( self ) -> Option<Self::Item>
+    {
+        if self.bag.used > 0
+        {
+            self.bag.data.get( self.bag.used - 1 )
+        }
+        else
+        {
+            None
+        }
+    }
+
+    /// Returns the nth element of the iterator.
+    ///
+    /// # Parameter: `n`
+    /// The non-negative offset from the iterator's index to access.
+    ///
+    /// # Postcondition
+    /// The bag is not altered by this method and the iterator's index may change.
+    ///
+    /// # Return
+    /// The nth element of the iterator or None if n is beyond the lenght of the iterator.
+    ///
+    /// # Note
+    /// The nth element of the iterator is not necessarily the nth element in the bag.
+    /// 
+    /// Calling nth( _ ) will not reset the iterator's index to its original state.
+    ///
+    /// # Examples
+    /// ```
+    /// let mut bag = Bag::new();
+    /// bag.insert( 1 );
+    /// bag.insert( 2 );
+    /// bag.insert( 3 );
+    ///
+    /// let mut iter = bag.into_iter();
+    ///
+    /// assert_eq!( iter.nth( 1 ), Some( &2 ) );
+    /// assert_eq!( iter.nth( 1 ), None ); 
+    /// ```
+
+    fn nth( &mut self, n: usize ) -> Option<Self::Item>
+    {
+        let next_index = 
+            match self.index
+            {
+                Some( i ) => i + n + 1,
+                None => n
+            };
+
+        self.index = Some( next_index );
+        self.bag.data[ ..self.bag.used ].get( next_index )
     }
 }
