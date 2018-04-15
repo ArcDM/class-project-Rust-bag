@@ -55,6 +55,8 @@ pub struct Bag<Type: PartialEq + Clone>
 impl<Type: PartialEq + Clone> Bag<Type>
 {
     /// Initialize an empty bag.
+    /// 
+    /// Implementation matches Default Constructor.
     ///
     /// # Return
     /// A bag that is empty and has a capacity of one.
@@ -74,6 +76,8 @@ impl<Type: PartialEq + Clone> Bag<Type>
     }
 
     /// Erase all copies of a specified element from this bag if target exists in bag.
+    /// 
+    /// Implementation matches erase( target ).
     ///
     /// # Parameter: `target`
     /// The element(s) to remove from the bag.
@@ -124,6 +128,8 @@ impl<Type: PartialEq + Clone> Bag<Type>
     }
 
     /// Remove one copy of a specified element from this bag.
+    /// 
+    /// Implementation matches erase_one( target ).
     ///
     /// # Parameter: `target`
     /// The element to remove from the bag.
@@ -163,6 +169,8 @@ impl<Type: PartialEq + Clone> Bag<Type>
     }
 
     /// Add a new element to this bag doubling capacity if needed.
+    /// 
+    /// Implementation matches insert( entry ).
     ///
     /// # Parameter: `new_item`
     /// The new element that is being inserted.
@@ -208,6 +216,8 @@ impl<Type: PartialEq + Clone> Bag<Type>
 
     /// Accessor method to count the number of occurrences of a
     /// particular element in this bag.
+    /// 
+    /// Implementation matches occurrences( target ).
     ///
     /// # Parameter: `target`
     /// The element for which number of occurrences will be counted.
@@ -242,6 +252,8 @@ impl<Type: PartialEq + Clone> Bag<Type>
 impl<Type: PartialEq + Clone> Len for Bag<Type>
 {
     /// Determine the number of elements in this bag.
+    /// 
+    /// Implementation matches size().
     ///
     /// # Postcondition
     /// This method does not alter state of the bag.
@@ -318,6 +330,8 @@ impl<Type: PartialEq + Clone> Clear for Bag<Type>
 impl<Type: PartialEq + Clone> Capacity for Bag<Type>
 {
     /// Return the current capacity of the bag.
+    /// 
+    /// Implementation matches getCapacity().
     ///
     /// # Postcondition
     /// This method does not alter state of the bag.
@@ -340,6 +354,8 @@ impl<Type: PartialEq + Clone> Capacity for Bag<Type>
 impl<Type: PartialEq + Clone> WithCapacity for Bag<Type>
 {
     /// Initialize an empty bag having a capacity of `initial_capacity`.
+    /// 
+    /// Implementation matches constructor with expressed capacity.
     ///
     /// # Parameter: `initial_capacity`
     /// An unsigned integer greater than 0.
@@ -389,6 +405,8 @@ impl<Type: PartialEq + Clone> WithCapacity for Bag<Type>
 impl<Type: PartialEq + Clone> CapacityMut for Bag<Type>
 {
     /// Potentially increase capacity of this bag.
+    /// 
+    /// Implementation matches ensureCapacity( newCapacity ).
     ///
     /// # Parameter: `new_capacity`
     /// An unsigned integer greater than 0.
@@ -442,6 +460,8 @@ impl<Type: PartialEq + Clone> CapacityMut for Bag<Type>
 
     /// Reduces the capacity of this bag to current size if there is
     /// excess capacity.
+    /// 
+    /// Implementation matches trimToSize().
     ///
     /// # Postcondition
     /// Capacity of this bag is reduced to the current number
@@ -494,6 +514,8 @@ impl<Type: PartialEq + Clone> Default for Bag<Type>
 impl<Type: PartialEq + Clone> Clone for Bag<Type>
 {
     /// Generate a copy of this bag.
+    /// 
+    /// Implementation matches copy constructor and assignment operator.
     ///
     /// # Postcondition
     /// * The clone is not the same object as the source.
@@ -519,6 +541,8 @@ impl<Type: PartialEq + Clone> Clone for Bag<Type>
     }
 
     /// Make a copy from a source.
+    /// 
+    /// Implementation matches copy constructor.
     ///
     /// # Parameter: `source`
     /// A reference to a bag that is to be copied.
@@ -540,6 +564,8 @@ impl<Type: PartialEq + Clone> Clone for Bag<Type>
 impl<Type: PartialEq + Clone> PartialEq for Bag<Type>
 {
     /// Compare this bag to another for equality of value.
+    /// 
+    /// Implementation matches equality operator.
     ///
     /// # Parameter: `other`
     /// The bag to compare to `self`.
@@ -560,6 +586,8 @@ impl<Type: PartialEq + Clone> PartialEq for Bag<Type>
     }
 
     /// Compare this bag to another object for inequality of value.
+    /// 
+    /// Implementation matches inequality operator.
     ///
     /// # Parameter: `other`
     /// The bag to compare to `self`.
@@ -581,6 +609,8 @@ impl<Type: PartialEq + Clone> PartialEq for Bag<Type>
 impl<Type: PartialEq + Clone> AddAssign for Bag<Type>
 {
     /// Add the contents of another bag to this bag.
+    /// 
+    /// Implementation matches add assignment operator.
     ///
     /// # Parameter: `other`
     /// A bag whose contents will be added to `self`.
@@ -619,6 +649,8 @@ impl<Type: PartialEq + Clone> Add for Bag<Type>
     type Output = Bag<Type>;
 
     /// Create a new bag that contains all the elements from two other bags.
+    /// 
+    /// Implementation matches addition operator.
     ///
     /// # Parameter: `other`
     /// The bag to be added with `self`.
@@ -647,6 +679,8 @@ impl<Type: PartialEq + Clone> Add for Bag<Type>
 impl<Type: PartialEq + Clone + Debug> Debug for Bag<Type>
 {
     /// Renders the bag's contents into a human readable form.
+    /// 
+    /// Implementation matches string buffer operator.
     ///
     /// # Precondition
     /// The type in the bag implements the trait: `Debug`.
@@ -681,6 +715,8 @@ impl<Type: PartialEq + Clone + Debug> Debug for Bag<Type>
 impl<Type: PartialEq + Clone + Hash> Hash for Bag<Type>
 {
     /// Create a hash value for the bag.
+    /// 
+    /// Implementation matches hashCode().
     ///
     /// Used for places that need a hash, like a hashmap.
     ///
