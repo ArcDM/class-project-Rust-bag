@@ -11,14 +11,16 @@
 //! 4) basic tests for the erase functions
 //!
 //! 5) basic tests for the += and + functions
+//!
+//! 6) tests for the bag iterator
+//!
+//! Run with `cargo test`
 
 extern crate rand;
 
 use bag::Bag;
 //use bagVec::Bag;
-
-#[ doc( hidden ) ]
-pub use bag::len_trait::{Len, Capacity, CapacityMut};
+use bag::len_trait::{Len, Capacity, CapacityMut};
 
 #[ test ]
 ///   Performs some basic tests of insert and the constant member functions.
@@ -291,4 +293,72 @@ fn test5()
 
     //   and now testing for occurrences of 2's in test_bag3.
     assert_eq!( test_bag3.occurrences( 2 ), 4000 );
+}
+
+#[ test ]
+///   Performs tests for the bag iterator
+fn test6()
+{
+    let mut testbag = Bag::new();
+
+    { // Testing next(), last(), and count()
+        let mut iter = testbag.into_iter();
+        assert_eq!( iter.next(), None );
+        assert_eq!( iter.last(), None );
+        assert_eq!( testbag.into_iter().count(), 0 );
+    }
+
+    testbag.insert( 8 );
+
+    { // Testing next(), last(), and count() again
+        let mut iter = testbag.into_iter();
+        assert_eq!( iter.next(), Some( &8 ) );
+        assert_eq!( iter.last(), Some( &8 ) );
+        assert_eq!( testbag.into_iter().count(), 1 );
+    }
+
+    testbag.insert( 3 );
+    testbag.insert( 4 );
+    testbag.insert( 7 );
+
+    { // Testing next(), last(), and count() again
+        let mut iter = testbag.into_iter();
+        assert_eq!( iter.next(), Some( &8 ) );
+        assert_eq!( iter.last(), Some( &7 ) );
+        assert_eq!( testbag.into_iter().count(), 4 );
+    }
+
+    testbag.insert( 2 );
+
+    {
+        let mut iter = testbag.into_iter();
+
+        // Testing the full range of the bag with next()
+        assert_eq!( iter.next(), Some( &8 ) );
+        assert_eq!( iter.next(), Some( &3 ) );
+        assert_eq!( iter.next(), Some( &4 ) );
+        assert_eq!( iter.next(), Some( &7 ) );
+        assert_eq!( iter.next(), Some( &2 ) );
+
+        // ... and then None once it's over.
+        assert_eq!( iter.next(), None );
+
+        // More calls may or may not return None. Here, they always will.
+        assert_eq!( iter.next(), None );
+        assert_eq!( iter.next(), None );
+    }
+    { // Testing the nth( _ ) method
+        let mut iter = testbag.into_iter();
+
+        assert_eq!( iter.nth( 1 ), Some( &3 ) );
+        assert_eq!( iter.nth( 1 ), Some( &7 ) );
+        assert_eq!( iter.nth( 1 ), None );
+    }
+    {
+        let mut iter = testbag.into_iter();
+
+        assert_eq!( iter.nth( 0 ), Some( &8 ) );
+        assert_eq!( iter.nth( 2 ), Some( &7 ) );
+        assert_eq!( iter.nth( 9 ), None );
+    }
 }
