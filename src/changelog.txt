@@ -1,21 +1,18 @@
 Implemented:
     4.4.2018
-    Assess functions in bag for a different implementation
+    Assess functions in bag for a different implementation.
         occurrences()
             Similar to the implementation observed from another student.
-        Debug::fmt() <generic>
+        Debug::fmt()
             All for nawt until I found the for_each() iterator function.
         Add::add()
             Couldnt use iterators but the code is nicer none the less.
-        AddAssign::add_assign()
-            I considered using what I used in Add::add()
-                but I believe my existing code is more efficient.
         PartialEq::eq()
             I used the built in slice eq trait, making it much simpler.
         trim_to_size
             A small expression change.
         erase_one
-            Used iterators and pattern matching
+            Used iterators and pattern matching.
         varius methods for reference parameters
             Parameters that are copyable, like usize, were left as non references.
 
@@ -23,7 +20,7 @@ Implemented:
 
     
     5.4.2018
-    Restructured bagexam.rs to fit more of a testing implementation
+    Restructured bagexam.rs to fit more of a testing implementation.
         It is now five tests with no print statements.
         I added a few more comparisons into it.
 
@@ -31,7 +28,9 @@ Implemented:
         Very simple change of a few parameters.
 
     8.4.2018
-    Added a 3rd-party library of traits that matches the methods that were implemented
+    Removed reference parameters for matching standard Rust convention.
+
+    Added a 3rd-party library of traits that matches the methods that were implemented.
         The most visible change is the names of the methods. The implementation is the same.
         This sets the naminging to match the convention seen in Rust.
         Gives me experience in using a library that is not in the std.
@@ -40,17 +39,31 @@ Implemented:
         bagexamf64.rs, bagexam.rs, bag.rs, bagf64.rs, bagVec.rs
         Included verbose descriptions and serveral examples.
 
+    14.4.2018
+    Finished (probably) documentation for all files.
+        Added comments for which methods matched the expressed implemented methods.
+
+    Added a forward iterator
+        The iterator involved a bag reference, which both ment no modification with
+        an active iterator and also explicit lifetime values. Added a few other
+        iterator funtions with the forward stepping.
+
+    Implemented type aliase for non-generic bag
+        If I had read carfully I would have realized earlier to not
+        implement this for the non-generic bag.
+
 In_Combat:
-    Explicit documentation
-        main.rs, bagtest.rs
+    <None>
 
 Planned:
-    Explicit documentation
-    Assess functions in bag for a different implementation
-        insert
-    Add a forward iterator
+    <None>
 
 Abandonded:
     Assess functions in bag for a different implementation
+        AddAssign::add_assign()
+            I considered using what I used in Add::add()
+                but I believe my existing code is more efficient.
         erase
-            Not only a problem in efficientcy, but also a problem of iterative implementation
+            Not only a problem in efficientcy, but also a problem of iterative implementation.
+        insert
+            No obvious reason for a more complicated solution.

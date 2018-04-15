@@ -1,160 +1,59 @@
-bag:
-    -I implemented the bag module converted from the Java bag
-     class. My implementation jumped straight into generic typing,
-     which wasn't bad seeing as we have done generics in other
-     lanuagesbefore.
+1) Keeping with non-referenced parameters:
+        I noticed how Rust's vectors do not take a reference
+    for their insert, remove, exc. functions. With this being
+    a sudo official example of how a structure should be made
+    in Rust I felt that matching this convention would prevent
+    confusion for anyone seeking to use my structure.
 
-    <33, 47, 70>
-    -The proper declaration an array could not be used with a
-     variable, so naturally I substituted a vector instead.
-        One way around this is to use malloc in an unsafe block,
-        but this goes against the scope of this project.
+2) Changes to methods:
+    occurrences()
+        Similar to the implementation observed from another student.
+    Debug::fmt()
+        Used the for_each() iterator function.
+    Add::add()
+        Couldnt use iterators but the code is nicer none the less.
+    PartialEq::eq()
+        I used the built in slice eq trait, making it much simpler.
+    trim_to_size()
+        A small expression change.
+    erase_one()
+        Used iterators and pattern matching.
 
-    <42, 57, 59, 81, 98, 100, 195, 197, 275, 297, 357, 386, 388>
-    -I notices some official documentations have fields 
-     with "# Panics" and "# Aborts", so I included them in
-     my documentation as well.
+3) The use of a 3rd-party trait library in place of existing methods:
+        As I mentioned before; matching convention helps alleviate
+    any confusion when using my stucture.
+        While the STD did not have any traits implementing these kind
+    of methods, I did find a 3rd-party library that did. Using these
+    functions not only with Rust conventional names but as traits
+    lets other programs and programmers that recognize these traits
+    to know the (expected) functionality of my bag implicitly.
 
-    <45>
-    -Keeping with Rust convention, I named the default constructor
-     for the bag "new".
+4) The non-generic bag:
+        Not much to say with this. Very little changes were needed
+    from the generic version.
 
-    <47, 70, 114>
-    -Vectors can not be initialized without being filled with data,
-     so I filled it with the default() of the type needed.
-        <270>
-        Additionally, I added a default() for the bag.
+5) The bagVec:
+        This was only an exercise in exploring the functionality of
+    the bag when using more of the functionality of the vector it
+    was using. One thing to note is how I have less control over
+    how the vector behaves when I rely on its internal methods.
 
-    <62, 84>
-    -To great annoyance; functions can not have overloaded names.
-     Thus I went with the conventions of using the function names
-     of "with_capacity: and "from_bag".
+6) The simplification of bagexam:
+        The motive for this is how the intention of using a test is
+    to prove the result and not an overly verbose explanation of it.
+    It now has no output except for if any test passed or failed.
 
-    <66, 107>
-    -For simplicity in certain places I insited a panic instead of
-     returning a Result. I have also noticed how a few standard
-     library functions might also do this.
+7) Implementing the forward iterator:
+        The biggest hurdle for this challenge was working with the
+    lifetimes of the values used. I used a few more iterator
+    methods than was asked for and noticed there were dozens more
+    that are avalable for use.
+        I did not use the iterator in any of my regular funtions
+    because I had not implemented the iterator functions that I
+    was using; such as filter() or for_each().
 
-    -The copy trait (assignment operator) could not be implemented
-     because vectors don't have a copy trait naturally.
-        I could have given them a copy trait, but that
-        goes against the intention of the a trait, the
-        clone trait would work much better for that need.
-
-    <306>
-    -In the Java implementation the equals comparison also
-     compared the hashes of the two bags. In Rust hashing would
-     require each generic type to also implement hashing.
-     Comparing hashes for types without hashing would be
-     impossible, which is a problem for a few types like
-     f32 and f64. Quite infuriating. Thus, to able to use as
-     many types as possible I opted for omitting the hashing check.
-        An alternative would have been to be able to use a
-        conditional check based on if the trait was implemented
-        for the generic type used, which after hours of searching
-        seems to be currently impossible.
-        Another idea is to implement hashing for every type that
-        is used in the bag, which could be cumbersome and
-        catastrophic if the implementation is wrong.
-        I hope that f32 and f64 will have an standard library
-        hashing implementation within the next two years.
-
-    <404>
-    -I had two options for displaying the bag: Display and Debug.
-     Most types implement the Debug trait while only some
-     implement Display, thus I used Debug.
-        [ Display could have also been used but not all types  ]
-        [ implement it and I would have coded it the same way. ]
-
-    <270, 284, 404, 436>
-    -There seem to be a couple of traits that every type should
-     have implemented where possible; Default, Clone, Debug,
-     and Hash. In this case the traits are only implemented if
-     the generic type also had that trait.
-        <23 and numerous others>
-        This is also why I have constrained the type to always
-        have at least certain traits, since those traits are
-        required for the intended implementation of the bag.
-
-bagexam:
-    -I implemented the bagexam module converted from the
-     C++ bagexam file. My implementation started with the full
-     intention that it would be called using "cargo test".
-
-    <20, 29>
-    -"Cargo test" naturally consumes all of the output that
-     would have printed if the program ran the function
-     normally. This annoyance can be disabled by using
-     "cargo test -- --nocapture". This extra argument seems
-     tedious, cumbersome, and easily forgettable, so naturally I
-     sought for a internal solution. That solution involved 
-     reverse engineering the print macro using ::std::fmt::write()
-     which, oddly enough, does actually display during a test.
-
-    <35>
-    -Oddly; Rust does not have a natural "return input from
-     keyboard" function/macro, so I had to create my own.
-[?]     I've made an interesting observation; using normal
-        println() macros, asking for input will still occure
-        during "cargo test" despite the user not recieving the
-        text promting them for it, leaving the program at a
-        blank line. The tester would have to assume or have
-        previusly known what to do.
-
-    <47, 53>
-    -I didn't like being asked for input every time I ran the
-     test, so I implemented it in two ways: "cargo test" will
-     still ask for input, while "cargo test -- --ignored" will
-     assume the tautaulogy of each needed input.
-
-    <59, 60, 69>
-    -Global variables must be declared as "const" or "static".
-     The static variant can be changed but only in "Unsafe"
-     blocks.
-
-    <83>
-    -A slight annoyance where the type must once again be
-     defined as having certain traits.
-
-    <108>
-    -Incrementing a character wasn't as straight forward as in
-     C++ but at least it wasn't too much of a hassle to implement.
-
-    -I could have written io::stdout().flush().unwrap() in the
-     many places to match the C++ file, but I didn't see the
-     point of doing so.
-
-    <677>
-    -After my experience last semester of using a funtion as an
-     argument in Java, I was dreading doing the same in Rust.
-     Luckly it was simple and straight forward.
-
-    -Most of the rest of the program was not much of a hassle,
-     aside from being tedious.
-
-bagtest:
-    Bagtest was unfortunately named for this conversion despite
-    not being called by "cargo test". There wasn't much to it to
-    begin with and most issues here were also handled in bagexam.
-
-    <30>
-    -A do while can be described as:
-
-     while
-     {
-        code here;
-        condition here
-     }
-     {}
-
-     The first block is an expression block that holds the code
-     of the loop but must produce a boolean. The second block is
-     empty unless you want code here to execute after the
-     condition check but before the first block begins again.
-
-Final Notes:
-    -I usually don't use the "use" statement, expecially for std.
-     I like seeing where a function is called from when I use it.
-     There are a few places where I do use "use" to improve
-     readability.
-
+8) Explicit documentation:
+        This is an rabbit hole that can go as far as you want it to.
+    With a variety of ways to format the comments and even sample
+    code to demonstrate, the limit is only how much you want to
+    explain.
