@@ -75,6 +75,122 @@ impl<Type: PartialEq + Clone> Bag<Type>
         Bag { data: Vec::with_capacity( 1 ) }
     }
 
+    /// Initialize an empty bag having a capacity of `initial_capacity`.
+    ///
+    /// # Note
+    /// This method has been deprecated in favor of a trait defined equivalent.
+    ///
+    /// # Parameter: `initial_capacity`
+    /// An unsigned integer greater than 0.
+    ///
+    /// # Precondition
+    /// `initial_capacity` must be greater than 0.
+    ///
+    /// # Return
+    /// A bag that is empty and has a capacity of `initial_capacity`.
+    ///
+    /// # Panics
+    /// `initial_capacity` given is not greater than 0.
+    ///
+    /// # Aborts
+    /// OOM: Insufficient memory for allocating a new array.
+
+    pub fn with_capacity( initial_capacity: usize ) -> Self
+    {
+        if initial_capacity <= 0
+        {
+            panic!( "initialCapacity must be > 0" );
+        }
+        else
+        {
+            Bag { data: Vec::with_capacity( initial_capacity ) }
+        }
+    }
+
+    /// Make a copy from a source.
+    /// 
+    /// # Note
+    /// This method has been deprecated in favor of clone() and clone_from().
+    ///
+    /// # Parameter: `source`
+    /// A reference to a bag that is to be copied.
+    ///
+    /// # Postcondition
+    /// This bag is now a copy of `source` and has a capacity of
+    /// of number of elements in `source`. Subsequent changes to
+    /// the copy will not affect the original, nor vice versa.
+    ///
+    /// # Aborts
+    /// OOM: Insufficient memory for allocating a new array.
+
+    pub fn from_bag( source: &Bag<Type> ) -> Self
+    {
+        Bag { data: source.data.clone() }
+    }
+
+    /// Potentially increase capacity of this bag.
+    ///
+    /// # Note
+    /// This method has been deprecated in favor of reserve( ).
+    ///
+    /// # Parameter: `new_capacity`
+    /// An unsigned integer greater than 0.
+    ///
+    /// # Precondition
+    /// `new_capacity` must be greater than 0.
+    ///
+    /// # Postcondition
+    /// The bag's capacity is at least `new_capacity`.  If the capacity
+    /// was already at or greater than `new_capacity`, then the capacity
+    /// is left unchanged.
+    ///
+    /// # Note
+    /// Unlike the expected reserve trait that takes an argument
+    /// of additional capacity, this implementation takes a total
+    /// new capacity as the argument.
+    ///
+    /// # Caution
+    /// Because of how reserve_exact() works, this method does
+    /// not always work as intended.
+    ///
+    /// # Panics
+    /// `new_capacity` given is not greater than 0.
+    ///
+    /// # Aborts
+    /// OOM: Insufficient memory for allocating a new array.
+
+    pub fn ensure_capacity( &mut self, mut new_capacity: usize )
+    {
+        if new_capacity <= 0
+        {
+            panic!( "new_capacity < 1" );
+        }
+        else
+        {
+            if self.data.capacity() < new_capacity
+            {
+                new_capacity -= self.data.capacity();
+                self.data.reserve_exact( new_capacity );
+            }
+        }
+    }
+
+    /// Return the current capacity of the bag.
+    ///
+    /// # Note
+    /// This method has been deprecated in favor of capacity().
+    ///
+    /// # Postcondition
+    /// This method does not alter state of the bag.
+    ///
+    /// # Return
+    /// An unsigned integer that represents total capacity of this bag.
+
+    pub fn get_capacity( &self ) -> usize
+    {
+        self.data.capacity()
+    }
+
     /// Erase all copies of a specified element from this bag if target exists in bag.
     /// 
     /// Implementation matches erase( target ).
@@ -214,6 +330,22 @@ impl<Type: PartialEq + Clone> Bag<Type>
         self.data.push( new_item );
     } 
 
+    /// Determine the number of elements in this bag.
+    ///
+    /// # Note
+    /// This method has been deprecated in favor of len().
+    ///
+    /// # Postcondition
+    /// This method does not alter state of the bag.
+    ///
+    /// # Return
+    /// The number of elements in this bag.
+
+    pub fn size( &self ) -> usize
+    {
+        self.data.len()
+    }
+
     /// Accessor method to count the number of occurrences of a
     /// particular element in this bag.
     /// 
@@ -246,6 +378,31 @@ impl<Type: PartialEq + Clone> Bag<Type>
         self.data.iter()
                 .filter( | &value | *value == target )
                 .count()
+    }
+
+    /// Reduces the capacity of this bag to current size if there is
+    /// excess capacity.
+    ///
+    /// # Note
+    /// This method has been deprecated in favor of shrink_to_fit().
+    ///
+    /// # Postcondition
+    /// Capacity of this bag is reduced to the current number
+    /// of items in bag or left unchanged if capacity equals to
+    /// number of items in bag but must be at least one.
+    ///
+    /// # Caution
+    /// Because of how shrink_to_fit() works, this method does
+    /// not always work as intended.
+
+    pub fn trim_to_size( &mut self )
+    {
+        self.data.shrink_to_fit();
+
+        if self.data.len() <= 1
+        {
+            self.data.reserve_exact( 1 );
+        }
     }
 }
 
