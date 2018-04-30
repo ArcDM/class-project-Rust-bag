@@ -17,7 +17,9 @@ bagexamf64.rs       => same as bagexam.rs configured for testing bagf64.rs
 
 main.rs             => the binding file for compileing, running, and documenting
     
-changelog.txt       => describes key changes made after the first implementation
+changelog.txt       => describes most of the changes made after the first implementation
+
+Notes.txt           => describes key points of changes made after the first implementation
 
 developmentlog.txt  => briefly describes the development process of the project
 
