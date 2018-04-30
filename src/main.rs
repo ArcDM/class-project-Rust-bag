@@ -8,6 +8,7 @@
 //! For the interactive test use `cargo run`
 
 #![ allow( dead_code ) ]
+#![ allow( unused_imports ) ]
 
 pub mod bag;
 pub mod bagexam;
