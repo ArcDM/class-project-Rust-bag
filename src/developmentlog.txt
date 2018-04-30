@@ -1,0 +1,15 @@
+    I started with translating DoubleArrayBag.java into Rust. Methods from bag2.cxx were also implemented. If a method had a corresponding trait it was implemented as that trait. This implementation was made as generic.
+
+    bagexam.cxx was next to be translated into Rust. A significant hurdle was outputting text durring a test.
+
+    bagtest.cxx was then translated into Rust. Very simple. I was shocked to find that there was not a simple input function.
+
+    I reevaluated most of the methods in bag.rs for a better way to code them, specificly to include iteration functions. Adding the iterator trait was a bit tricky, involving reference lifetimes.
+
+    Making a non-generic verson of the bag from the generic was pretty simple. I also implemented a second bag with a few changes to it's underlying functionality.
+
+    bagexam.rs was changed to not give output. Dispite how neat it is to get output from the test, the purpose is to test the project and not to read the same output each time.
+
+     Additional 3rd party traits were added to the bag files to support conforming to conventions set in rust.
+
+    Very verbose documentation was added to most files along with documented examples for many methods. My documentation might seem excesive seeing as it is sometimes more verbose than some official documentations. I was a bit annoyed about how fuctions marked as test are skipped in creating documentation.

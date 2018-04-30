@@ -1,0 +1,25 @@
+===EXECUTION===
+to test the project as bagexam => `cargo test`
+to test the project as bagtest => `cargo run`
+
+===FILES===
+bag.rs              => derived from DoubleArrayBag.java and bag2.cxx
+
+bagVec.rs           => same as bag.rs except uses a different implementation
+
+bagf64.rs           => non-generic version of bag.rs
+
+bagtest.rs          => derived from bagtest.cxx to interactively test bag.rs
+
+bagexam.rs          => derived from bagexam.cxx for testing bag.rs
+
+bagexamf64.rs       => same as bagexam.rs configured for testing bagf64.rs
+
+main.rs             => the binding file for compileing, running, and documenting
+    
+changelog.txt       => describes key changes made after the first implementation
+
+developmentlog.txt  => briefly describes the development process of the project
+
+README.Haiduk       => this file describing project files
+
